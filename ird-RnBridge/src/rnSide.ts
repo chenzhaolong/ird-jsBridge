@@ -1,13 +1,16 @@
 /**
  * @file rn端的jsBridge的api
  */
-import {RnSide} from '../../interface/rn-side';
+import {RnSide} from '../interface/rnSide';
 
-// src-side注册的方法
+// rn-side注册的方法
 const RnApiMap = {};
 
-// src-side注册的回调
+// rn-side注册的回调
 const RnCallback = {};
+
+// 验证通过传递给h5的票据
+const tokenToH5 = '';
 
 export default {
     /**

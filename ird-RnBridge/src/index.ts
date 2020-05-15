@@ -1,8 +1,8 @@
 /**
  * @file rn模式下的api
  */
-import RnSideApi from './rn-side';
-import H5SideApi from './h5-side';
+import RnSideApi from './rnSide';
+import { H5SideApi } from './h5Side';
 
 export const JsBridgeRn = {
     RnSideApi,

@@ -9,4 +9,18 @@ export namespace H5Side {
     export type invoke = (data?: any) => any
 
     export type listen = (data?: any) => any
+
+    export enum types {
+        SAFETY = 'safety',
+        ERROR = 'error',
+        HCB = 'hcb',
+        HAPI = 'hapi'
+    }
+
+    export interface H5ReceiveParams {
+        type: types,
+        callbackID?: string,
+        data: any,
+        method?: string
+    }
 }

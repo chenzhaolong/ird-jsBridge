@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/chenzhaolong/ird-jsBridge#readme",
   "dependencies": {
+    "@types/md5": "^2.2.0",
+    "md5": "^2.2.1",
     "typescript": "^3.2.4"
   }
 }

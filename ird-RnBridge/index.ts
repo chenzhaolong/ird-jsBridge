@@ -5,14 +5,14 @@ import { JsBridgeRn } from './src';
 
 const RnJsBridge = {
     switchMode(options) {
-        const {type} = options;
+        const {mode} = options;
         const self = this;
-        if (type === 'src-side') {
+        if (mode === 'rn') {
             const RnSideApi = JsBridgeRn.RnSideApi;
             Object.keys(RnSideApi).forEach((key: string) => {
                 self[key] = RnSideApi[key];
             })
-        } else if (type === 'h5-side') {
+        } else if (mode === 'h5') {
             const H5SideApi = JsBridgeRn.H5SideApi;
             Object.keys(H5SideApi).forEach((key: string) => {
                 self[key] = H5SideApi[key];

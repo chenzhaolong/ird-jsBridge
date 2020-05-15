@@ -1,0 +1,132 @@
+/**
+ * @file h5端的jsBridge的api
+ */
+import {H5Side} from '../interface/h5Side';
+import {Doc, Win} from "../../constant";
+const md5 = require('md5');
+
+export const H5SideApi = (function() {
+    // h5-side注册的方法
+    let h5ApiMap = {};
+
+    // h5-side注册的回调
+    let h5Callback = {};
+
+    // rn-side传过来的api
+    let RnApiMap = [];
+
+    // 初始化时rn验证通过返回的票据
+    let tokenFromRn = '';
+
+    let h5CbId = 0;
+
+    // 监听
+    function listenEvent() {
+        if (Doc) {
+            Doc.addEventListener('message', (params: string) => {
+                let parseData: H5Side.H5ReceiveParams;
+                try {
+                    parseData = JSON.parse(params);
+                } catch(e) {
+                    parseData = {type: H5Side.types.ERROR, data: 'parse params error， check the params'};
+                }
+                const {type, callbackID, data, method} = parseData;
+                switch (type) {
+                    case H5Side.types.SAFETY:
+                        initInnerPropertyAfterSuccess(data);
+                        break;
+                    case H5Side.types.ERROR:
+                        break;
+                    case H5Side.types.HCB:
+                        break;
+                    case H5Side.types.HAPI:
+                        break;
+                }
+            })
+        }
+    }
+
+    // 验证成功后初始化内部属性
+    function initInnerPropertyAfterSuccess(params) {
+        if (params.isSafe) {
+            RnApiMap = params.RnApiMap;
+            tokenFromRn = params.token;
+            invokeCallback(params.cbId, '');
+        }
+    }
+
+    // 调用H5Callback回调
+    function invokeCallback (cbId, params) {
+        if (cbId && h5Callback[cbId] && typeof h5Callback[cbId] === 'function') {
+            const fn = h5Callback[cbId];
+            delete h5Callback[cbId];
+            fn(params);
+        }
+    }
+
+    // 注册h5的回调函数
+    function registerCb (cb) {
+        if (cb && typeof cb === 'function') {
+            h5CbId += 1;
+            const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
+            h5Callback[registerKey] = cb;
+            return registerKey
+        }
+        return ''
+    }
+
+    function sendData(data) {
+        const params = JSON.stringify(data);
+        if (Win) {
+            Win.postMessage(params);
+        }
+    }
+
+    return {
+        /**
+         * 初始化提供给rn端调用的jsApi方法
+         * @param api 注册的api方法集合
+         */
+        initH5(api: H5Side.ApiMap) {
+        },
+
+        /**
+         * jsBridge安全性校验
+         * @param params src-side传过来的校验参数
+         */
+        checkSafty(params: object, cb?: () => void) {
+            listenEvent();
+            const registerKey = registerCb(cb);
+            const data: any = {
+                type: 'checkSafety',
+                params
+            };
+            if (registerKey) {
+                data.cbId = registerKey
+            }
+            sendData(data);
+        },
+
+        /**
+         * 调用rn-side的js方法
+         * @param method 方法名
+         * @param params 参数
+         * @param cb 回调函数
+         */
+        invokeRN(method: string, params: any, cb: (data?: any) => any) {
+        },
+
+        /**
+         * 监听rn-side调用的方法
+         * @param params 参数
+         */
+        listenRN(params: object) {
+        },
+
+        /**
+         * 扩展h5-side的jsb的方法
+         */
+        extends(method: string, cb: (invoke: H5Side.invoke, listen: H5Side.listen) => any) {
+        }
+    }
+})();
