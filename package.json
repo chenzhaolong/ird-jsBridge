@@ -2,7 +2,7 @@
   "name": "ird-jsbridge",
   "version": "1.0.0",
   "description": "hybird and react-native js",
-  "main": "index.ts",
+  "main": "ird-RnBridge/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

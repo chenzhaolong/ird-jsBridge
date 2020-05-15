@@ -1,12 +1,12 @@
 /**
  * @file rn端的jsBridge的api
  */
-import {RnSide} from '../../../interface/rn-side';
+import {RnSide} from '../../interface/rn-side';
 
-// rn-side注册的方法
+// src-side注册的方法
 const RnApiMap = {};
 
-// rn-side注册的回调
+// src-side注册的回调
 const RnCallback = {};
 
 export default {

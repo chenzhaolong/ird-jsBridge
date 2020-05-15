@@ -3,7 +3,7 @@
  */
 
 export namespace H5Side {
-    // rn-side的api格式
+    // src-side的api格式
     export type ApiMap = {[key: string]: (params: any, send: (data: any) => any) => any}
 
     export type invoke = (data?: any) => any

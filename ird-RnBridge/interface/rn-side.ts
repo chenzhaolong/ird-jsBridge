@@ -3,6 +3,6 @@
  */
 
 export namespace RnSide {
-    // rn-side的api格式
+    // src-side的api格式
     export type ApiMap = {[key: string]: (params: any, send: (data: any) => any) => any}
 }

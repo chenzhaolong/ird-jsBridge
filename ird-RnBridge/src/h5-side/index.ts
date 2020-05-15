@@ -1,7 +1,7 @@
 /**
  * @file h5端的jsBridge的api
  */
-import {H5Side} from '../../../interface/h5-side';
+import {H5Side} from '../../interface/h5-side';
 
 // h5-side注册的方法
 const h5ApiMap = {};
@@ -9,7 +9,7 @@ const h5ApiMap = {};
 // h5-side注册的回调
 const H5Callback = {};
 
-// rn-side传过来的api
+// src-side传过来的api
 const RnApiMap = [];
 
 export default {
@@ -22,7 +22,7 @@ export default {
 
     /**
      * jsBridge安全性校验
-     * @param params rn-side传过来的校验参数
+     * @param params src-side传过来的校验参数
      */
     checkSafty(params: object) {
     },
