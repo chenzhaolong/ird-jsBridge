@@ -2,6 +2,7 @@
  * @file h5端的jsBridge的api
  */
 import {H5Side} from '../interface/h5Side';
+import {RnSide} from '../interface/rnSide';
 import {Doc, Win} from "../../constant";
 const md5 = require('md5');
 
@@ -28,12 +29,12 @@ export const H5SideApi = (function() {
                 try {
                     parseData = JSON.parse(params);
                 } catch(e) {
-                    parseData = {type: H5Side.types.ERROR, data: 'parse params error， check the params'};
+                    parseData = {type: H5Side.types.ERROR, response: 'parse params error， check the params'};
                 }
-                const {type, callbackID, data, method} = parseData;
+                const {type, callbackId, response, method} = parseData;
                 switch (type) {
                     case H5Side.types.SAFETY:
-                        initInnerPropertyAfterSuccess(data);
+                        initInnerPropertyAfterSuccess(response, callbackId);
                         break;
                     case H5Side.types.ERROR:
                         break;
@@ -47,11 +48,11 @@ export const H5SideApi = (function() {
     }
 
     // 验证成功后初始化内部属性
-    function initInnerPropertyAfterSuccess(params) {
-        if (params.isSafe) {
-            RnApiMap = params.RnApiMap;
-            tokenFromRn = params.token;
-            invokeCallback(params.cbId, '');
+    function initInnerPropertyAfterSuccess(response, callbackId) {
+        if (response.isSafe) {
+            RnApiMap = response.RnApiMapKeys;
+            tokenFromRn = response.token;
+            invokeCallback(callbackId, '');
         }
     }
 
@@ -98,11 +99,11 @@ export const H5SideApi = (function() {
             listenEvent();
             const registerKey = registerCb(cb);
             const data: any = {
-                type: 'checkSafety',
-                params
+                type: RnSide.types.CHECKSAFETY,
+                response: params
             };
             if (registerKey) {
-                data.cbId = registerKey
+                data.callbackId = registerKey
             }
             sendData(data);
         },

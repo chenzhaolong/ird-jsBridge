@@ -19,8 +19,8 @@ export namespace H5Side {
 
     export interface H5ReceiveParams {
         type: types,
-        callbackID?: string,
-        data: any,
+        callbackId?: string,
+        response: any,
         method?: string
     }
 }
