@@ -3,7 +3,7 @@
  */
 import {RnSide} from '../interface/rnSide';
 import {H5Side} from "../interface/h5Side";
-import { isBoolean } from "../../utils";
+import {isBoolean, isFunction} from "../../utils";
 
 const md5 = require('md5');
 
@@ -20,6 +20,9 @@ export const RnSideApi = (function () {
     // 验证通过传递给h5的票据
     let tokenToH5 = '';
 
+    // 记录cb的指针
+    let rnCbId = 0;
+
     // 发送消息到h5端
     function sendData (params) {
         if (webview && webview.postMessage && typeof webview.postMessage === 'function') {
@@ -28,12 +31,55 @@ export const RnSideApi = (function () {
         }
     }
 
+    // 注册h5的回调函数
+    function registerCb (cb) {
+        if (cb && typeof cb === 'function') {
+            rnCbId += 1;
+            const registerKey = md5(`rn_${rnCbId}_${Date.now()}`);
+            RnCallback[registerKey] = cb;
+            return registerKey
+        }
+        return ''
+    }
+
+    function invokeRnApi(method, callbackId, response) {
+        const {params, token} = response;
+        if (token === tokenToH5) {
+            const fn = RnApiMap[method];
+            if (fn && typeof fn === 'function') {
+                const partialSend = (result) => {
+                    const json = {
+                        type: H5Side.types.HCB,
+                        callbackId,
+                        response: result
+                    };
+                    sendData(json);
+                };
+                fn(params, partialSend)
+            }
+        } else {
+            sendData({
+                type: H5Side.types.ERROR,
+                callbackId,
+                response: 'token is wrong!'
+            })
+        }
+    }
+
+    function invokeRnCb(response, callbackId) {
+        const fn = RnCallback[callbackId];
+        if (isFunction(fn)) {
+            delete RnCallback[callbackId];
+            fn(response);
+        }
+    }
+
     return {
         /**
          * 初始化提供给h5页面调用的jsApi方法
          * @param api 注册的api方法集合
          */
-        initWebview(api: RnSide.ApiMap, refWebview) {
+        initWebview(refWebview, api: RnSide.ApiMap) {
             if (refWebview) {
                 webview = refWebview;
             }
@@ -87,6 +133,16 @@ export const RnSideApi = (function () {
          * @param cb 回调函数
          */
         invokeH5(method: string, params: any, cb: (data?: any) => any) {
+            let json: H5Side.H5ReceiveParams = {
+                type: H5Side.types.HAPI,
+                response: params,
+                method: method
+            };
+            const callbackId = registerCb(cb);
+            if (callbackId) {
+                json.callbackId = callbackId
+            }
+            sendData(json);
         },
 
         /**
@@ -103,30 +159,18 @@ export const RnSideApi = (function () {
                 }
             }
             const {method, type, response, callbackId} = json;
-            if (type === RnSide.types.CHECKSAFETY) {
-                this.executeCheckSafety(json)
-            } else if (type === RnSide.types.RAPI) {
-                const {params, token} = response;
-                if (token === tokenToH5) {
-                    const fn = RnApiMap[method];
-                    if (fn && typeof fn === 'function') {
-                        const partialSend = (result) => {
-                            const json = {
-                                type: H5Side.types.HCB,
-                                callbackId,
-                                response: result
-                            };
-                            sendData(json);
-                        };
-                        fn(params, partialSend)
-                    }
-                } else {
-                    sendData({
-                        type: H5Side.types.ERROR,
-                        callbackId,
-                        response: 'token is wrong!'
-                    })
-                }
+            switch (type) {
+                case RnSide.types.CHECKSAFETY:
+                    this.executeCheckSafety(json);
+                    break;
+                case RnSide.types.RAPI:
+                    invokeRnApi(method, callbackId, response);
+                    break;
+                case RnSide.types.RCB:
+                    invokeRnCb(response, callbackId);
+                    break;
+                case RnSide.types.ERROR:
+                    break;
             }
         }
     }

@@ -42,6 +42,12 @@ export const H5SideApi = (function() {
                     case H5Side.types.SAFETY:
                         initInnerPropertyAfterSuccess(response, callbackId);
                         break;
+                    case H5Side.types.HCB:
+                        invokeCallback(callbackId, response);
+                        break;
+                    case H5Side.types.HAPI:
+                        invokeH5Api(method, response, callbackId);
+                        break;
                     case H5Side.types.ERROR:
                         if (h5Callback[callbackId]) {
                             delete h5Callback[callbackId];
@@ -49,11 +55,6 @@ export const H5SideApi = (function() {
                         if (isFunction(errorHandle)) {
                             errorHandle(response);
                         }
-                        break;
-                    case H5Side.types.HCB:
-                        invokeCallback(callbackId, response);
-                        break;
-                    case H5Side.types.HAPI:
                         break;
                 }
             })
@@ -75,6 +76,21 @@ export const H5SideApi = (function() {
             const fn = h5Callback[cbId];
             delete h5Callback[cbId];
             fn(params);
+        }
+    }
+
+    function invokeH5Api (method, response, callbackId) {
+        const fn = h5ApiMap[method];
+        const partialSend = (result) => {
+            let json = {
+                type: RnSide.types.RCB,
+                callbackId,
+                response: result
+            };
+            sendData(json);
+        };
+        if (isFunction(fn)) {
+            fn(response, partialSend);
         }
     }
 
@@ -106,6 +122,11 @@ export const H5SideApi = (function() {
          * @param api 注册的api方法集合
          */
         initH5(api: H5Side.ApiMap) {
+            if (Object.keys(h5ApiMap).length > 0) {
+                h5ApiMap = {...h5ApiMap, ...api}
+            } else{
+                h5ApiMap = api
+            }
         },
 
         /**
@@ -150,9 +171,12 @@ export const H5SideApi = (function() {
 
         /**
          * 监听rn-side调用的方法
-         * @param params 参数
+         * @param cb 参数
          */
-        listenRN(params: object) {
+        listenRN(method: string, cb) {
+            if (!h5ApiMap[method]) {
+                h5ApiMap[method] = cb
+            }
         },
 
         /**
