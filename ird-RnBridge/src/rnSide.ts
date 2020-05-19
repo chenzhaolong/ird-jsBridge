@@ -46,7 +46,7 @@ export const RnSideApi = (function () {
          * jsBridge安全性校验
          * @param params h5-side传过来的校验参数
          */
-        executeCheckSafty(params: RnSide.RnParams) {
+        executeCheckSafety(params: RnSide.RnParams) {
             if (tokenToH5) {
                 return;
             }
@@ -62,7 +62,7 @@ export const RnSideApi = (function () {
                             callbackId,
                             response: {
                                 RnApiMapKeys,
-                                token: isBoolean(result) && tokenToH5,
+                                token: isBoolean(result) ? tokenToH5 : '',
                                 isSafe: result || true
                             }
                         };
@@ -104,7 +104,7 @@ export const RnSideApi = (function () {
             }
             const {method, type, response, callbackId} = json;
             if (type === RnSide.types.CHECKSAFETY) {
-                this.executeCheckSafty(json)
+                this.executeCheckSafety(json)
             } else if (type === RnSide.types.RAPI) {
                 const {params, token} = response;
                 if (token === tokenToH5) {
@@ -121,7 +121,11 @@ export const RnSideApi = (function () {
                         fn(params, partialSend)
                     }
                 } else {
-
+                    sendData({
+                        type: H5Side.types.ERROR,
+                        callbackId,
+                        response: 'token is wrong!'
+                    })
                 }
             }
         }

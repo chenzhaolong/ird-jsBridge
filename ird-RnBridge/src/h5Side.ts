@@ -3,7 +3,8 @@
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
-import {Doc, Win} from "../../constant";
+import {Doc, Win} from '../../constant';
+import { isBoolean, isFunction } from '../../utils';
 
 const md5 = require('md5');
 
@@ -20,7 +21,11 @@ export const H5SideApi = (function() {
     // 初始化时rn验证通过返回的票据
     let tokenFromRn = '';
 
+    // 记录cb的指针
     let h5CbId = 0;
+
+    // 错误处理
+    let errorHandle;
 
     // 监听
     function listenEvent() {
@@ -38,8 +43,15 @@ export const H5SideApi = (function() {
                         initInnerPropertyAfterSuccess(response, callbackId);
                         break;
                     case H5Side.types.ERROR:
+                        if (h5Callback[callbackId]) {
+                            delete h5Callback[callbackId];
+                        }
+                        if (isFunction(errorHandle)) {
+                            errorHandle(response);
+                        }
                         break;
                     case H5Side.types.HCB:
+                        invokeCallback(callbackId, response);
                         break;
                     case H5Side.types.HAPI:
                         break;
@@ -50,7 +62,7 @@ export const H5SideApi = (function() {
 
     // 验证成功后初始化内部属性
     function initInnerPropertyAfterSuccess(response, callbackId) {
-        if (typeof response.isSafe === 'boolean' && response.isSafe) {
+        if (isBoolean(response.isSafe)) {
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
             invokeCallback(callbackId, '');
@@ -100,7 +112,7 @@ export const H5SideApi = (function() {
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params: object, cb?: () => void) {
+        checkSafty(params: object, cb) {
             listenEvent();
             const registerKey = registerCb(cb);
             const data: any = {
