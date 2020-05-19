@@ -4,6 +4,7 @@
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
 import {Doc, Win} from "../../constant";
+
 const md5 = require('md5');
 
 export const H5SideApi = (function() {
@@ -77,10 +78,14 @@ export const H5SideApi = (function() {
     }
 
     function sendData(data) {
-        const params = JSON.stringify(data);
         if (Win) {
+            const params = JSON.stringify(data);
             Win.postMessage(params);
         }
+    }
+
+    function caniuse (method: string): boolean {
+        return RnApiMap.indexOf(method) !== -1;
     }
 
     return {
@@ -115,6 +120,20 @@ export const H5SideApi = (function() {
          * @param cb 回调函数
          */
         invokeRN(method: string, params: any, cb: (data?: any) => any) {
+            if (!caniuse(method)) {
+                return;
+            }
+            let json: RnSide.RnParams = {
+                type: RnSide.types.RAPI,
+                response: {params, token: tokenFromRn},
+                method
+            };
+            const registerKey = registerCb(cb);
+            if (registerKey) {
+                json.callbackId = registerKey
+            }
+
+            sendData(json);
         },
 
         /**

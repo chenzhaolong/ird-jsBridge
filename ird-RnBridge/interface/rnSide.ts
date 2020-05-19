@@ -7,10 +7,10 @@ export namespace RnSide {
     export type ApiMap = {[key: string]: (params: any, send: (data: any) => any) => any}
 
     export enum types {
-        CHECKSAFETY = 'checkSafety',
-        ERROR = 'error',
-        RCB = 'rcb',
-        RAPI = 'rapi'
+        CHECKSAFETY = 'checkSafety', // 安全性校验
+        ERROR = 'error', // 错误
+        RCB = 'rcb', // 执行rn的cb
+        RAPI = 'rapi' // 执行rn的api
     }
 
     export interface RnParams {

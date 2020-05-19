@@ -7,7 +7,7 @@ const md5 = require('md5');
 
 export const RnSideApi = (function () {
     // webview对象
-    let webview = '';
+    let webview;
 
     // rn-side注册的方法
     let RnApiMap = {};
@@ -20,9 +20,9 @@ export const RnSideApi = (function () {
 
     // 发送消息到h5端
     function sendData (params) {
-        const jsonParams = JSON.stringify(params);
-        if (this.webview && this.webview.postMessage && this.webview.postMessage) {
-            this.webview.postMessage(jsonParams);
+        if (webview && webview.postMessage && typeof webview.postMessage === 'function') {
+            const jsonParams = JSON.stringify(params);
+            webview.postMessage(jsonParams);
         }
     }
 
@@ -32,10 +32,12 @@ export const RnSideApi = (function () {
          * @param api 注册的api方法集合
          */
         initWebview(api: RnSide.ApiMap, refWebview) {
-            if (!refWebview) {
+            if (refWebview) {
                 webview = refWebview;
             }
-            RnApiMap = api;
+            if (api && typeof api === 'object') {
+                RnApiMap = api;
+            }
         },
 
         /**
@@ -86,6 +88,37 @@ export const RnSideApi = (function () {
          * @param params 参数
          */
         listenH5(params: object) {
+            let json;
+            if (typeof params === 'string') {
+                try {
+                    json = JSON.parse(params);
+                } catch (e) {
+                    json = {}
+                }
+            }
+            const {method, type, response, callbackId} = json;
+            if (type === RnSide.types.CHECKSAFETY) {
+                this.executeCheckSafty(json)
+            } else if (type === RnSide.types.RAPI) {
+                const {params, token} = response;
+                if (token === tokenToH5) {
+                    const fn = RnApiMap[method];
+                    if (fn && typeof fn === 'function') {
+                        const partialSend = (result) => {
+                            tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                            const json = {
+                                type: H5Side.types.HCB,
+                                callbackId,
+                                response: result
+                            };
+                            sendData(json);
+                        };
+                        fn(params, partialSend)
+                    }
+                } else {
+
+                }
+            }
         }
     }
 })();
