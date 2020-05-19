@@ -3,6 +3,8 @@
  */
 import {RnSide} from '../interface/rnSide';
 import {H5Side} from "../interface/h5Side";
+import { isBoolean } from "../../utils";
+
 const md5 = require('md5');
 
 export const RnSideApi = (function () {
@@ -58,7 +60,11 @@ export const RnSideApi = (function () {
                         const json = {
                             type: H5Side.types.SAFETY,
                             callbackId,
-                            response: {RnApiMapKeys, token: tokenToH5, isSafe: result || true}
+                            response: {
+                                RnApiMapKeys,
+                                token: isBoolean(result) && tokenToH5,
+                                isSafe: result || true
+                            }
                         };
                         sendData(json);
                     };
@@ -105,7 +111,6 @@ export const RnSideApi = (function () {
                     const fn = RnApiMap[method];
                     if (fn && typeof fn === 'function') {
                         const partialSend = (result) => {
-                            tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                             const json = {
                                 type: H5Side.types.HCB,
                                 callbackId,
