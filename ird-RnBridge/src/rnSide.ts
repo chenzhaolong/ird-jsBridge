@@ -10,7 +10,7 @@ export const RnSideApi = (function () {
     let webview = '';
 
     // rn-side注册的方法
-    const RnApiMap = {};
+    let RnApiMap = {};
 
     // rn-side注册的回调
     const RnCallback = {};
@@ -31,7 +31,11 @@ export const RnSideApi = (function () {
          * 初始化提供给h5页面调用的jsApi方法
          * @param api 注册的api方法集合
          */
-        initWebview(api: RnSide.ApiMap, webview) {
+        initWebview(api: RnSide.ApiMap, refWebview) {
+            if (!refWebview) {
+                webview = refWebview;
+            }
+            RnApiMap = api;
         },
 
         /**
@@ -43,21 +47,22 @@ export const RnSideApi = (function () {
                 return;
             }
             const {type, response, callbackId} = params;
-            tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
             if (type === RnSide.types.CHECKSAFETY) {
                 const fn = RnApiMap['checkSafety'];
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
-                    const partialSend = () => {
+                    const partialSend = (result) => {
+                        tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                         const json = {
                             type: H5Side.types.SAFETY,
                             callbackId,
-                            response: {RnApiMapKeys, token: tokenToH5, isSafe: true}
+                            response: {RnApiMapKeys, token: tokenToH5, isSafe: result || true}
                         };
                         sendData(json);
                     };
                     fn(response, partialSend)
                 } else {
+                    tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                     sendData({
                         type: H5Side.types.SAFETY,
                         callbackId,

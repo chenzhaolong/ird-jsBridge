@@ -49,7 +49,7 @@ export const H5SideApi = (function() {
 
     // 验证成功后初始化内部属性
     function initInnerPropertyAfterSuccess(response, callbackId) {
-        if (response.isSafe) {
+        if (typeof response.isSafe === 'boolean' && response.isSafe) {
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
             invokeCallback(callbackId, '');
