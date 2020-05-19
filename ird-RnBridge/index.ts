@@ -1,22 +1,25 @@
 /**
  * @file ird-JSBridge的api入口
  */
-import { JsBridgeRn } from './src';
+import { H5SideApi } from './src/h5Side';
+import { RnSideApi } from './src/rnSide';
 
 const RnJsBridge = {
     switchMode(options) {
         const {mode} = options;
         const self = this;
         if (mode === 'rn') {
-            const RnSideApi = JsBridgeRn.RnSideApi;
-            Object.keys(RnSideApi).forEach((key: string) => {
-                self[key] = RnSideApi[key];
-            })
+            if (Object.keys(RnJsBridge).length === 1) {
+                Object.keys(RnSideApi).forEach((key: string)=> {
+                    self[key] = RnSideApi[key]
+                })
+            }
         } else if (mode === 'h5') {
-            const H5SideApi = JsBridgeRn.H5SideApi;
-            Object.keys(H5SideApi).forEach((key: string) => {
-                self[key] = H5SideApi[key];
-            })
+            // @ts-ignore
+            if (!window.RnJsBridge) {
+                // @ts-ignore
+                window.RnJsBridge = H5SideApi
+            }
         }
     }
 };
