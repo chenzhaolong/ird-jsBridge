@@ -17,6 +17,9 @@ export const RnSideApi = (function () {
     // rn-side注册的回调
     const RnCallback = {};
 
+    // rn-side注册的失败回调
+    const RnCallbackFail = {};
+
     // 验证通过传递给h5的票据
     let tokenToH5 = '';
 
@@ -32,11 +35,14 @@ export const RnSideApi = (function () {
     }
 
     // 注册h5的回调函数
-    function registerCb (cb) {
-        if (cb && typeof cb === 'function') {
+    function registerCb (success, fail) {
+        if (success && typeof success === 'function') {
             rnCbId += 1;
             const registerKey = md5(`rn_${rnCbId}_${Date.now()}`);
-            RnCallback[registerKey] = cb;
+            RnCallback[registerKey] = success;
+            if (fail && typeof fail === 'function') {
+                RnCallbackFail[registerKey] = fail;
+            }
             return registerKey
         }
         return ''
@@ -47,11 +53,11 @@ export const RnSideApi = (function () {
         if (token === tokenToH5) {
             const fn = RnApiMap[method];
             if (fn && typeof fn === 'function') {
-                const partialSend = (result) => {
+                const partialSend = (isSuccess, result) => {
                     const json = {
                         type: H5Side.types.HCB,
                         callbackId,
-                        response: result
+                        response: {isSuccess, params: result}
                     };
                     sendData(json);
                 };
@@ -67,10 +73,12 @@ export const RnSideApi = (function () {
     }
 
     function invokeRnCb(response, callbackId) {
-        const fn = RnCallback[callbackId];
-        if (isFunction(fn)) {
+        const {isSuccess, params} = response;
+        if (callbackId) {
+            const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
             delete RnCallback[callbackId];
-            fn(response);
+            delete RnCallbackFail[callbackId];
+            fn(params);
         }
     }
 
@@ -101,15 +109,15 @@ export const RnSideApi = (function () {
                 const fn = RnApiMap['checkSafety'];
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
-                    const partialSend = (result) => {
+                    const partialSend = (isSuccess) => {
                         tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                         const json = {
                             type: H5Side.types.SAFETY,
                             callbackId,
                             response: {
                                 RnApiMapKeys,
-                                token: isBoolean(result) ? tokenToH5 : '',
-                                isSafe: result || true
+                                token: isBoolean(isSuccess) ? tokenToH5 : '',
+                                isSafe: typeof isSuccess === 'boolean' ? isSuccess : true
                             }
                         };
                         sendData(json);
@@ -128,17 +136,16 @@ export const RnSideApi = (function () {
 
         /**
          * 调用h5-side的js方法
-         * @param method 方法名
-         * @param params 参数
-         * @param cb 回调函数
+         * @param options 选项
          */
-        invokeH5(method: string, params: any, cb: (data?: any) => any) {
+        invokeH5(options: RnSide.InvokeH5Params) {
+            const {method, params, success, fail} = options;
             let json: H5Side.H5ReceiveParams = {
                 type: H5Side.types.HAPI,
                 response: params,
                 method: method
             };
-            const callbackId = registerCb(cb);
+            const callbackId = registerCb(success, fail);
             if (callbackId) {
                 json.callbackId = callbackId
             }

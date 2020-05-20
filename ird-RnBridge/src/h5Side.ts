@@ -15,6 +15,9 @@ export const H5SideApi = (function() {
     // h5-side注册的回调
     let h5Callback = {};
 
+    // h5-side注册的失败回调
+    let h5CallbackFail = {};
+
     // rn-side传过来的api
     let RnApiMap = [];
 
@@ -66,26 +69,28 @@ export const H5SideApi = (function() {
         if (isBoolean(response.isSafe)) {
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
-            invokeCallback(callbackId, '');
+            invokeCallback(callbackId, {isSuccess: true, params: ''});
         }
     }
 
     // 调用H5Callback回调
-    function invokeCallback (cbId, params) {
-        if (cbId && h5Callback[cbId] && typeof h5Callback[cbId] === 'function') {
-            const fn = h5Callback[cbId];
+    function invokeCallback (cbId, data) {
+        const {isSuccess, params} = data;
+        if (cbId) {
+            const fn = isSuccess ? h5Callback[cbId] : h5CallbackFail[cbId];
             delete h5Callback[cbId];
+            delete h5CallbackFail[cbId];
             fn(params);
         }
     }
 
     function invokeH5Api (method, response, callbackId) {
         const fn = h5ApiMap[method];
-        const partialSend = (result) => {
+        const partialSend = (isSuccess, result) => {
             let json = {
                 type: RnSide.types.RCB,
                 callbackId,
-                response: result
+                response: {isSuccess, params: result}
             };
             sendData(json);
         };
@@ -95,11 +100,14 @@ export const H5SideApi = (function() {
     }
 
     // 注册h5的回调函数
-    function registerCb (cb) {
-        if (cb && typeof cb === 'function') {
+    function registerCb (success, fail) {
+        if (success && typeof success === 'function') {
             h5CbId += 1;
             const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
-            h5Callback[registerKey] = cb;
+            h5Callback[registerKey] = success;
+            if (fail && typeof fail === 'function') {
+                h5CallbackFail[registerKey] = fail;
+            }
             return registerKey
         }
         return ''
@@ -133,9 +141,9 @@ export const H5SideApi = (function() {
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params: object, cb) {
+        checkSafty(params: object, success) {
             listenEvent();
-            const registerKey = registerCb(cb);
+            const registerKey = registerCb(success, '');
             const data: any = {
                 type: RnSide.types.CHECKSAFETY,
                 response: params
@@ -148,11 +156,10 @@ export const H5SideApi = (function() {
 
         /**
          * 调用rn-side的js方法
-         * @param method 方法名
-         * @param params 参数
-         * @param cb 回调函数
+         * @param options 参数
          */
-        invokeRN(method: string, params: any, cb: (data?: any) => any) {
+        invokeRN(options: H5Side.InvokeRnparams) {
+            const {method, params, success, fail} = options;
             if (!caniuse(method)) {
                 return;
             }
@@ -161,7 +168,7 @@ export const H5SideApi = (function() {
                 response: {params, token: tokenFromRn},
                 method
             };
-            const registerKey = registerCb(cb);
+            const registerKey = registerCb(success, fail);
             if (registerKey) {
                 json.callbackId = registerKey
             }

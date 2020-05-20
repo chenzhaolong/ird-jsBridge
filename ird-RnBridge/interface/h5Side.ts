@@ -23,4 +23,11 @@ export namespace H5Side {
         response: any,
         method?: string
     }
+
+    export interface InvokeRnparams {
+        method: string,
+        params: any,
+        success: (data: any) => any,
+        fail: (error: any) => any
+    }
 }
