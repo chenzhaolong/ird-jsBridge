@@ -189,7 +189,11 @@ export const H5SideApi = (function() {
         /**
          * 扩展h5-side的jsb的方法
          */
-        extends(method: string, cb: (invoke: H5Side.invoke, listen: H5Side.listen) => any) {
+        extends(method: string, cb: (params: any) => any) {
+            const self = this;
+            if (!self[method]) {
+                self[method] = cb
+            }
         }
     }
 })();
