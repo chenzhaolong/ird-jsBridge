@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "es2015",
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "./index.ts",
+    "./src/*.ts",
+    "./interface/*.ts",
+    "./constant/*.ts",
+    "./utils/*.ts"
+  ]
+}

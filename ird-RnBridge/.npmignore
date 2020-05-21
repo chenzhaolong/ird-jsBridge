@@ -1,0 +1,23 @@
+#constant
+const/index.ts
+
+#interface
+interface/h5Side.ts
+interface/rnSide.ts
+
+#Dependency directories
+node_modules/
+
+#src
+src/h5/Side.ts
+src/h5/rnSide.ts
+
+#utils
+utils/index.ts
+
+#root
+index.ts
+rollup.config.js
+tsconfig.json
+
+.idea/

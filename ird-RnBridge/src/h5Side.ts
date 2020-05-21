@@ -3,23 +3,25 @@
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
-import {Doc, Win} from '../../constant';
-import { isBoolean, isFunction } from '../../utils';
+// @ts-ignore
+import {Doc, Win} from '../constant/index';
+// @ts-ignore
+import { isBoolean, isFunction } from '../utils/index';
 
 const md5 = require('md5');
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
-    let h5ApiMap = {};
+    let h5ApiMap: any = {};
 
     // h5-side注册的回调
-    let h5Callback = {};
+    let h5Callback: {[key: string]: any} = {};
 
     // h5-side注册的失败回调
-    let h5CallbackFail = {};
+    let h5CallbackFail: any = {};
 
     // rn-side传过来的api
-    let RnApiMap = [];
+    let RnApiMap: any[] = [];
 
     // 初始化时rn验证通过返回的票据
     let tokenFromRn = '';
@@ -28,7 +30,7 @@ export const H5SideApi = (function() {
     let h5CbId = 0;
 
     // 错误处理
-    let errorHandle;
+    let errorHandle: any;
 
     // 监听
     function listenEvent() {
@@ -40,7 +42,7 @@ export const H5SideApi = (function() {
                 } catch(e) {
                     parseData = {type: H5Side.types.ERROR, response: 'parse params error， check the params'};
                 }
-                const {type, callbackId, response, method} = parseData;
+                const {type, callbackId = '', response, method = ''} = parseData;
                 switch (type) {
                     case H5Side.types.SAFETY:
                         initInnerPropertyAfterSuccess(response, callbackId);
@@ -65,7 +67,7 @@ export const H5SideApi = (function() {
     }
 
     // 验证成功后初始化内部属性
-    function initInnerPropertyAfterSuccess(response, callbackId) {
+    function initInnerPropertyAfterSuccess(response: any, callbackId: string) {
         if (isBoolean(response.isSafe)) {
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
@@ -74,7 +76,7 @@ export const H5SideApi = (function() {
     }
 
     // 调用H5Callback回调
-    function invokeCallback (cbId, data) {
+    function invokeCallback (cbId: string, data: any) {
         const {isSuccess, params} = data;
         if (cbId) {
             const fn = isSuccess ? h5Callback[cbId] : h5CallbackFail[cbId];
@@ -84,9 +86,9 @@ export const H5SideApi = (function() {
         }
     }
 
-    function invokeH5Api (method, response, callbackId) {
+    function invokeH5Api (method: string, response: any, callbackId: string) {
         const fn = h5ApiMap[method];
-        const partialSend = (isSuccess, result) => {
+        const partialSend = (isSuccess: boolean, result: any) => {
             let json = {
                 type: RnSide.types.RCB,
                 callbackId,
@@ -100,7 +102,7 @@ export const H5SideApi = (function() {
     }
 
     // 注册h5的回调函数
-    function registerCb (success, fail) {
+    function registerCb (success: (data: any) => {}, fail: any) {
         if (success && typeof success === 'function') {
             h5CbId += 1;
             const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
@@ -113,7 +115,7 @@ export const H5SideApi = (function() {
         return ''
     }
 
-    function sendData(data) {
+    function sendData(data: any) {
         if (Win) {
             const params = JSON.stringify(data);
             Win.postMessage(params);
@@ -141,7 +143,7 @@ export const H5SideApi = (function() {
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params: object, success) {
+        checkSafty(params: object, success: () => {}) {
             listenEvent();
             const registerKey = registerCb(success, '');
             const data: any = {
@@ -180,7 +182,7 @@ export const H5SideApi = (function() {
          * 监听rn-side调用的方法
          * @param cb 参数
          */
-        listenRN(method: string, cb) {
+        listenRN(method: string, cb: () => {}) {
             if (!h5ApiMap[method]) {
                 h5ApiMap[method] = cb
             }
@@ -190,9 +192,10 @@ export const H5SideApi = (function() {
          * 扩展h5-side的jsb的方法
          */
         extends(method: string, cb: (params: any) => any) {
-            const self = this;
-            if (!self[method]) {
-                self[method] = cb
+            // @ts-ignore
+            if (!window.RnJsBridge[method]) {
+                // @ts-ignore
+                window.RnJsBridge[method] = cb
             }
         }
     }

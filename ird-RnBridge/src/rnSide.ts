@@ -3,22 +3,23 @@
  */
 import {RnSide} from '../interface/rnSide';
 import {H5Side} from "../interface/h5Side";
-import {isBoolean, isFunction} from "../../utils";
+// @ts-ignore
+import {isBoolean, isFunction} from "../utils/index";
 
 const md5 = require('md5');
 
 export const RnSideApi = (function () {
     // webview对象
-    let webview;
+    let webview: any;
 
     // rn-side注册的方法
-    let RnApiMap = {};
+    let RnApiMap: {[key: string]: any} = {};
 
     // rn-side注册的回调
-    const RnCallback = {};
+    const RnCallback: {[key: string]: any} = {};
 
     // rn-side注册的失败回调
-    const RnCallbackFail = {};
+    const RnCallbackFail: {[key: string]: any} = {};
 
     // 验证通过传递给h5的票据
     let tokenToH5 = '';
@@ -27,7 +28,7 @@ export const RnSideApi = (function () {
     let rnCbId = 0;
 
     // 发送消息到h5端
-    function sendData (params) {
+    function sendData (params: any) {
         if (webview && webview.postMessage && typeof webview.postMessage === 'function') {
             const jsonParams = JSON.stringify(params);
             webview.postMessage(jsonParams);
@@ -35,7 +36,7 @@ export const RnSideApi = (function () {
     }
 
     // 注册h5的回调函数
-    function registerCb (success, fail) {
+    function registerCb (success: (data: any) => {}, fail: any) {
         if (success && typeof success === 'function') {
             rnCbId += 1;
             const registerKey = md5(`rn_${rnCbId}_${Date.now()}`);
@@ -48,12 +49,12 @@ export const RnSideApi = (function () {
         return ''
     }
 
-    function invokeRnApi(method, callbackId, response) {
+    function invokeRnApi(method: string, callbackId: string, response: any) {
         const {params, token} = response;
         if (token === tokenToH5) {
             const fn = RnApiMap[method];
             if (fn && typeof fn === 'function') {
-                const partialSend = (isSuccess, result) => {
+                const partialSend = (isSuccess: () => any, result: any) => {
                     const json = {
                         type: H5Side.types.HCB,
                         callbackId,
@@ -72,7 +73,7 @@ export const RnSideApi = (function () {
         }
     }
 
-    function invokeRnCb(response, callbackId) {
+    function invokeRnCb(response: any, callbackId: string) {
         const {isSuccess, params} = response;
         if (callbackId) {
             const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
@@ -87,7 +88,7 @@ export const RnSideApi = (function () {
          * 初始化提供给h5页面调用的jsApi方法
          * @param api 注册的api方法集合
          */
-        initWebview(refWebview, api: RnSide.ApiMap) {
+        initWebview(refWebview: any, api: RnSide.ApiMap) {
             if (refWebview) {
                 webview = refWebview;
             }
@@ -109,7 +110,7 @@ export const RnSideApi = (function () {
                 const fn = RnApiMap['checkSafety'];
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
-                    const partialSend = (isSuccess) => {
+                    const partialSend = (isSuccess: boolean) => {
                         tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                         const json = {
                             type: H5Side.types.SAFETY,

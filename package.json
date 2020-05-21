@@ -4,7 +4,7 @@
   "description": "hybird and react-native js",
   "main": "ird-RnBridge/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-rn": "sh ./bin/compiler.sh"
   },
   "repository": {
     "type": "git",
@@ -20,8 +20,15 @@
   },
   "homepage": "https://github.com/chenzhaolong/ird-jsBridge#readme",
   "dependencies": {
+    "@babel/core": "^7.9.6",
     "@types/md5": "^2.2.0",
     "md5": "^2.2.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-filesize": "^9.0.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "rollup-plugin-uglify": "^6.0.4",
     "typescript": "^3.2.4"
   }
 }

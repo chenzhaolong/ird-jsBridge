@@ -2,7 +2,5 @@
   "name": "ird-RnBridge",
   "version": "1.0.0",
   "main": "./dist/RhBridge.js",
-  "dependencies": {
-    
-  }
+  "dependencies": {}
 }
