@@ -1,6 +1,12 @@
 {
-  "name": "ird-RnBridge",
+  "name": "ird-rnbridge",
   "version": "1.0.0",
   "main": "./dist/RhBridge.js",
-  "dependencies": {}
+  "dependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
