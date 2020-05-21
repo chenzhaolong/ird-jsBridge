@@ -9,9 +9,9 @@ import json from 'rollup-plugin-json';
 export default {
     input: './index.js',
     output: {
-        file: './dist/RhBridge.js',
+        file: './dist/RnBridge.js',
         format: 'umd',
-        name: 'RhBridge'
+        name: 'RnBridge'
     },
     plugins: [
         babel({ exclude: 'node_modules/**' }),
