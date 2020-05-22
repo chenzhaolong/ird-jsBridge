@@ -21,8 +21,6 @@
   "homepage": "https://github.com/chenzhaolong/ird-jsBridge#readme",
   "dependencies": {
     "@babel/core": "^7.9.6",
-    "@types/md5": "^2.2.0",
-    "md5": "^2.2.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^9.0.0",
     "rollup-plugin-json": "^4.0.0",

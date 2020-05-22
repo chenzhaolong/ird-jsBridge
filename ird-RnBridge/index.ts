@@ -5,7 +5,7 @@ import { H5SideApi } from './src/h5Side';
 import { RnSideApi } from './src/rnSide';
 const pkg = require('./package.json');
 
-const RnJsBridge = {
+export const RnJsBridge = {
     version: pkg.version,
 
     switchMode(options: any) {
@@ -27,5 +27,3 @@ const RnJsBridge = {
         }
     }
 };
-
-export default RnJsBridge
