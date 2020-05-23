@@ -1,4 +1,4 @@
 export declare const RnJsBridge: {
-    version: any;
+    version: string;
     switchMode(options: any): void;
 };

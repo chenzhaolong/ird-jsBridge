@@ -3,12 +3,8 @@
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
-// @ts-ignore
 import {Doc, Win} from '../constant/index';
-// @ts-ignore
-import { isBoolean, isFunction } from '../utils/index';
-
-const md5 = require('md5');
+import { isBoolean, isFunction, getUID1 } from '../utils/index';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -105,7 +101,8 @@ export const H5SideApi = (function() {
     function registerCb (success: (data: any) => {}, fail: any) {
         if (success && typeof success === 'function') {
             h5CbId += 1;
-            const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
+            // const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
+            const registerKey = getUID1(`h5_${h5CbId}_${Date.now()}`);
             h5Callback[registerKey] = success;
             if (fail && typeof fail === 'function') {
                 h5CallbackFail[registerKey] = fail;

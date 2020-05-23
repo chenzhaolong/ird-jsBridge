@@ -11,3 +11,11 @@ export declare function isBoolean(params: any): boolean;
  * @param fn
  */
 export declare function isFunction(fn: any): boolean;
+/**
+ * 生成唯一值
+ */
+export declare function getUID(): string;
+/**
+ * 生成唯一值
+ */
+export declare function getUID1(cbId: string): string;

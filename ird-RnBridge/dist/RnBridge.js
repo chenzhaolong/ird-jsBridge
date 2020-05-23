@@ -1,8 +1,5 @@
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = global || self, factory(global.RnBridge = {}));
-}(this, (function (exports) { 'use strict';
+var RnBridge = (function (exports) {
+    'use strict';
 
     /**
      * @file h5端的jsBridge的api类型
@@ -61,13 +58,32 @@
     function isFunction(fn) {
       return typeof fn === 'function';
     }
+    /**
+     * 生成唯一值
+     */
+
+    function getUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : r & 0x3 | 0x8;
+        return v.toString(16);
+      });
+    }
+    /**
+     * 生成唯一值
+     */
+
+    function getUID1(cbId) {
+      return `xxx-yyy-${cbId}`.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : r & 0x3 | 0x8;
+        return v.toString(16);
+      });
+    }
 
     /**
      * @file h5端的jsBridge的api
      */
-
-    const md5 = require('md5');
-
     const H5SideApi = function () {
       // h5-side注册的方法
       let h5ApiMap = {}; // h5-side注册的回调
@@ -183,8 +199,9 @@
 
       function registerCb(success, fail) {
         if (success && typeof success === 'function') {
-          h5CbId += 1;
-          const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
+          h5CbId += 1; // const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
+
+          const registerKey = getUID1(`h5_${h5CbId}_${Date.now()}`);
           h5Callback[registerKey] = success;
 
           if (fail && typeof fail === 'function') {
@@ -300,9 +317,6 @@
     /**
      * @file rn端的jsBridge的api
      */
-
-    const md5$1 = require('md5');
-
     const RnSideApi = function () {
       // webview对象
       let webview; // rn-side注册的方法
@@ -328,7 +342,7 @@
       function registerCb(success, fail) {
         if (success && typeof success === 'function') {
           rnCbId += 1;
-          const registerKey = md5$1(`rn_${rnCbId}_${Date.now()}`);
+          const registerKey = getUID1(`rn_${rnCbId}_${Date.now()}`);
           RnCallback[registerKey] = success;
 
           if (fail && typeof fail === 'function') {
@@ -424,7 +438,8 @@
 
             if (fn && typeof fn === 'function') {
               const partialSend = isSuccess => {
-                tokenToH5 = md5$1(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                tokenToH5 = getUID();
                 const json = {
                   type: H5Side.types.SAFETY,
                   callbackId,
@@ -439,7 +454,8 @@
 
               fn(response, partialSend);
             } else {
-              tokenToH5 = md5$1(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+              // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+              tokenToH5 = getUID();
               sendData({
                 type: H5Side.types.SAFETY,
                 callbackId,
@@ -524,11 +540,8 @@
     /**
      * @file ird-JSBridge的api入口
      */
-
-    const pkg = require('./package.json');
-
     const RnJsBridge = {
-      version: pkg.version,
+      version: '1.0.0',
 
       switchMode(options) {
         const {
@@ -556,6 +569,6 @@
 
     exports.RnJsBridge = RnJsBridge;
 
-    Object.defineProperty(exports, '__esModule', { value: true });
+    return exports;
 
-})));
+}({}));

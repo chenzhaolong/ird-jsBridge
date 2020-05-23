@@ -3,9 +3,8 @@
  */
 import { H5SideApi } from './src/h5Side';
 import { RnSideApi } from './src/rnSide';
-const pkg = require('./package.json');
 export const RnJsBridge = {
-    version: pkg.version,
+    version: '1.0.0',
     switchMode(options) {
         const { mode } = options;
         const self = this;

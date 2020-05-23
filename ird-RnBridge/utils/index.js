@@ -15,3 +15,21 @@ export function isBoolean(params) {
 export function isFunction(fn) {
     return typeof fn === 'function';
 }
+/**
+ * 生成唯一值
+ */
+export function getUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+/**
+ * 生成唯一值
+ */
+export function getUID1(cbId) {
+    return `xxx-yyy-${cbId}`.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}

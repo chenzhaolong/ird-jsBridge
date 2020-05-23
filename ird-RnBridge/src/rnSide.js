@@ -3,9 +3,7 @@
  */
 import { RnSide } from '../interface/rnSide';
 import { H5Side } from "../interface/h5Side";
-// @ts-ignore
-import { isBoolean } from "../utils/index";
-const md5 = require('md5');
+import { isBoolean, getUID, getUID1 } from "../utils/index";
 export const RnSideApi = (function () {
     // webview对象
     let webview;
@@ -30,7 +28,7 @@ export const RnSideApi = (function () {
     function registerCb(success, fail) {
         if (success && typeof success === 'function') {
             rnCbId += 1;
-            const registerKey = md5(`rn_${rnCbId}_${Date.now()}`);
+            const registerKey = getUID1(`rn_${rnCbId}_${Date.now()}`);
             RnCallback[registerKey] = success;
             if (fail && typeof fail === 'function') {
                 RnCallbackFail[registerKey] = fail;
@@ -99,7 +97,8 @@ export const RnSideApi = (function () {
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
                     const partialSend = (isSuccess) => {
-                        tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                        // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                        tokenToH5 = getUID();
                         const json = {
                             type: H5Side.types.SAFETY,
                             callbackId,
@@ -114,7 +113,8 @@ export const RnSideApi = (function () {
                     fn(response, partialSend);
                 }
                 else {
-                    tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                    // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
+                    tokenToH5 = getUID();
                     sendData({
                         type: H5Side.types.SAFETY,
                         callbackId,
