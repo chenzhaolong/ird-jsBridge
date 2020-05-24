@@ -1,5 +1,8 @@
-var RnBridge = (function () {
-    'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = global || self, global.RnBridge = factory());
+}(this, (function () { 'use strict';
 
     /**
      * @file h5端的jsBridge的api类型
@@ -572,4 +575,4 @@ var RnBridge = (function () {
 
     return index;
 
-}());
+})));

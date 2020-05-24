@@ -11,7 +11,7 @@ export default {
     input: './index.js',
     output: {
         file: './dist/RnBridge.js',
-        format: 'iife',
+        format: 'umd',
         name: 'RnBridge'
     },
     plugins: [
