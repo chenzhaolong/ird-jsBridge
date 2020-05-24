@@ -1,4 +1,4 @@
-var RnBridge = (function (exports) {
+var RnBridge = (function () {
     'use strict';
 
     /**
@@ -540,7 +540,7 @@ var RnBridge = (function (exports) {
     /**
      * @file ird-JSBridge的api入口
      */
-    const RnJsBridge = {
+    var index = {
       version: '1.0.0',
 
       switchMode(options) {
@@ -550,7 +550,7 @@ var RnBridge = (function (exports) {
         const self = this;
 
         if (mode === 'rn') {
-          if (Object.keys(RnJsBridge).length === 2) {
+          if (Object.keys(self).length === 2) {
             Object.keys(RnSideApi).forEach(key => {
               // @ts-ignore
               self[key] = RnSideApi[key];
@@ -558,17 +558,18 @@ var RnBridge = (function (exports) {
           }
         } else if (mode === 'h5') {
           // @ts-ignore
-          if (!window.RnJsBridge) {
+          if (!window.RnBridge) {
             // @ts-ignore
-            window.RnJsBridge = H5SideApi;
+            window.RnBridge = H5SideApi; // @ts-ignore
+          } else if (typeof window.RnBridge === 'object' && Object.keys(window.RnBridge).length < 3) {
+            // @ts-ignore
+            window.RnBridge = Object.assign({}, window.RnBridge, H5SideApi);
           }
         }
       }
 
     };
 
-    exports.RnJsBridge = RnJsBridge;
+    return index;
 
-    return exports;
-
-}({}));
+}());
