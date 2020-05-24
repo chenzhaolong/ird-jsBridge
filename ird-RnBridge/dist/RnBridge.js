@@ -37,12 +37,6 @@
     })(RnSide || (RnSide = {}));
 
     /**
-     * @file ird-jsBridge 常量
-     */
-    const Doc = document || null;
-    const Win = window || null;
-
-    /**
      * @file 工具库
      */
 
@@ -104,12 +98,13 @@
       let errorHandle; // 监听
 
       function listenEvent() {
-        if (Doc) {
-          Doc.addEventListener('message', params => {
+        if (document) {
+          // @ts-ignore
+          document.addEventListener('message', params => {
             let parseData;
 
             try {
-              parseData = JSON.parse(params);
+              parseData = JSON.parse(params.data);
             } catch (e) {
               parseData = {
                 type: H5Side.types.ERROR,
@@ -218,9 +213,10 @@
       }
 
       function sendData(data) {
-        if (Win) {
-          const params = JSON.stringify(data);
-          Win.postMessage(params);
+        if (window) {
+          const params = JSON.stringify(data); // @ts-ignore
+
+          window.postMessage(params);
         }
       }
 
@@ -245,7 +241,7 @@
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params, success) {
+        checkSafety(params, success) {
           listenEvent();
           const registerKey = registerCb(success, '');
           const data = {
@@ -257,7 +253,9 @@
             data.callbackId = registerKey;
           }
 
-          sendData(data);
+          setTimeout(() => {
+            sendData(data);
+          }, 1000);
         },
 
         /**

@@ -12,7 +12,7 @@ export declare const H5SideApi: {
      * jsBridge安全性校验
      * @param params src-side传过来的校验参数
      */
-    checkSafty(params: object, success: () => {}): void;
+    checkSafety(params: object, success: () => {}): void;
     /**
      * 调用rn-side的js方法
      * @param options 参数

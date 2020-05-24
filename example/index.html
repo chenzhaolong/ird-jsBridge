@@ -5,10 +5,16 @@
     <title>Title</title>
 </head>
 <body>
-  <div style="width: 100px; height: 200px; color: red">nihao</div>
+  <div style="width: 100px; height: 200px; color: red" id="demo">nihao12</div>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
+      // document.addEventListener('message', (e) => {
+      //     document.getElementById('demo').innerText = e.data;
+      // });
+      RnBridge.checkSafety({demo: 'demo'}, () => {
+          document.getElementById('demo').style.color = 'blue';
+      })
   </script>
 </body>
 </html>

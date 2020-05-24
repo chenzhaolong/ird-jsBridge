@@ -3,7 +3,6 @@
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
-import {Doc, Win} from '../constant/index';
 import { isBoolean, isFunction, getUID1 } from '../utils/index';
 
 export const H5SideApi = (function() {
@@ -30,11 +29,12 @@ export const H5SideApi = (function() {
 
     // 监听
     function listenEvent() {
-        if (Doc) {
-            Doc.addEventListener('message', (params: string) => {
+        if (document) {
+            // @ts-ignore
+            document.addEventListener('message', (params: {data: string}) => {
                 let parseData: H5Side.H5ReceiveParams;
                 try {
-                    parseData = JSON.parse(params);
+                    parseData = JSON.parse(params.data);
                 } catch(e) {
                     parseData = {type: H5Side.types.ERROR, response: 'parse params error， check the params'};
                 }
@@ -78,17 +78,17 @@ export const H5SideApi = (function() {
             const fn = isSuccess ? h5Callback[cbId] : h5CallbackFail[cbId];
             delete h5Callback[cbId];
             delete h5CallbackFail[cbId];
-            fn(params);
+            fn && fn(params);
         }
     }
 
     function invokeH5Api (method: string, response: any, callbackId: string) {
         const fn = h5ApiMap[method];
-        const partialSend = (isSuccess: boolean, result: any) => {
+        const partialSend = (options: {isSuccess: boolean, result: any}) => {
             let json = {
                 type: RnSide.types.RCB,
                 callbackId,
-                response: {isSuccess, params: result}
+                response: {isSuccess: options.isSuccess, params: options.result}
             };
             sendData(json);
         };
@@ -113,9 +113,10 @@ export const H5SideApi = (function() {
     }
 
     function sendData(data: any) {
-        if (Win) {
+        if (window) {
             const params = JSON.stringify(data);
-            Win.postMessage(params);
+            // @ts-ignore
+            window.postMessage(params);
         }
     }
 
@@ -140,7 +141,7 @@ export const H5SideApi = (function() {
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params: object, success: () => {}) {
+        checkSafety(params: object, success: () => {}) {
             listenEvent();
             const registerKey = registerCb(success, '');
             const data: any = {
@@ -150,7 +151,9 @@ export const H5SideApi = (function() {
             if (registerKey) {
                 data.callbackId = registerKey
             }
-            sendData(data);
+            setTimeout(() => {
+                sendData(data);
+            }, 1000);
         },
 
         /**

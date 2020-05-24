@@ -51,11 +51,11 @@ export const RnSideApi = (function () {
         if (token === tokenToH5) {
             const fn = RnApiMap[method];
             if (fn && typeof fn === 'function') {
-                const partialSend = (isSuccess: () => any, result: any) => {
+                const partialSend = (options: {isSuccess: boolean, result: any}) => {
                     const json = {
                         type: H5Side.types.HCB,
                         callbackId,
-                        response: {isSuccess, params: result}
+                        response: {isSuccess: options.isSuccess, params: options.result}
                     };
                     sendData(json);
                 };
@@ -76,7 +76,7 @@ export const RnSideApi = (function () {
             const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
             delete RnCallback[callbackId];
             delete RnCallbackFail[callbackId];
-            fn(params);
+            fn && fn(params);
         }
     }
 
@@ -107,7 +107,7 @@ export const RnSideApi = (function () {
                 const fn = RnApiMap['checkSafety'];
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
-                    const partialSend = (isSuccess: boolean) => {
+                    const partialSend = (options: {isSuccess: boolean}) => {
                         // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                         tokenToH5 = getUID();
                         const json = {
@@ -115,8 +115,8 @@ export const RnSideApi = (function () {
                             callbackId,
                             response: {
                                 RnApiMapKeys,
-                                token: isBoolean(isSuccess) ? tokenToH5 : '',
-                                isSafe: typeof isSuccess === 'boolean' ? isSuccess : true
+                                token: isBoolean(options.isSuccess) ? tokenToH5 : '',
+                                isSafe: typeof options.isSuccess === 'boolean' ? options.isSuccess : true
                             }
                         };
                         sendData(json);

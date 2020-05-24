@@ -3,7 +3,6 @@
  */
 import { H5Side } from '../interface/h5Side';
 import { RnSide } from '../interface/rnSide';
-import { Doc, Win } from '../constant/index';
 import { isBoolean, isFunction, getUID1 } from '../utils/index';
 export const H5SideApi = (function () {
     // h5-side注册的方法
@@ -22,11 +21,12 @@ export const H5SideApi = (function () {
     let errorHandle;
     // 监听
     function listenEvent() {
-        if (Doc) {
-            Doc.addEventListener('message', (params) => {
+        if (document) {
+            // @ts-ignore
+            document.addEventListener('message', (params) => {
                 let parseData;
                 try {
-                    parseData = JSON.parse(params);
+                    parseData = JSON.parse(params.data);
                 }
                 catch (e) {
                     parseData = { type: H5Side.types.ERROR, response: 'parse params error， check the params' };
@@ -101,9 +101,10 @@ export const H5SideApi = (function () {
         return '';
     }
     function sendData(data) {
-        if (Win) {
+        if (window) {
             const params = JSON.stringify(data);
-            Win.postMessage(params);
+            // @ts-ignore
+            window.postMessage(params);
         }
     }
     function caniuse(method) {
@@ -126,7 +127,7 @@ export const H5SideApi = (function () {
          * jsBridge安全性校验
          * @param params src-side传过来的校验参数
          */
-        checkSafty(params, success) {
+        checkSafety(params, success) {
             listenEvent();
             const registerKey = registerCb(success, '');
             const data = {
@@ -136,7 +137,9 @@ export const H5SideApi = (function () {
             if (registerKey) {
                 data.callbackId = registerKey;
             }
-            sendData(data);
+            setTimeout(() => {
+                sendData(data);
+            }, 1000);
         },
         /**
          * 调用rn-side的js方法
