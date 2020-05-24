@@ -170,20 +170,20 @@
           const fn = isSuccess ? h5Callback[cbId] : h5CallbackFail[cbId];
           delete h5Callback[cbId];
           delete h5CallbackFail[cbId];
-          fn(params);
+          fn && fn(params);
         }
       }
 
       function invokeH5Api(method, response, callbackId) {
         const fn = h5ApiMap[method];
 
-        const partialSend = (isSuccess, result) => {
+        const partialSend = options => {
           let json = {
             type: RnSide.types.RCB,
             callbackId,
             response: {
-              isSuccess,
-              params: result
+              isSuccess: options.isSuccess,
+              params: options.result
             }
           };
           sendData(json);
@@ -366,13 +366,13 @@
           const fn = RnApiMap[method];
 
           if (fn && typeof fn === 'function') {
-            const partialSend = (isSuccess, result) => {
+            const partialSend = options => {
               const json = {
                 type: H5Side.types.HCB,
                 callbackId,
                 response: {
-                  isSuccess,
-                  params: result
+                  isSuccess: options.isSuccess,
+                  params: options.result
                 }
               };
               sendData(json);
@@ -399,7 +399,7 @@
           const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
           delete RnCallback[callbackId];
           delete RnCallbackFail[callbackId];
-          fn(params);
+          fn && fn(params);
         }
       }
 
@@ -438,7 +438,7 @@
             const RnApiMapKeys = Object.keys(RnApiMap);
 
             if (fn && typeof fn === 'function') {
-              const partialSend = isSuccess => {
+              const partialSend = options => {
                 // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                 tokenToH5 = getUID();
                 const json = {
@@ -446,8 +446,8 @@
                   callbackId,
                   response: {
                     RnApiMapKeys,
-                    token: isBoolean(isSuccess) ? tokenToH5 : '',
-                    isSafe: typeof isSuccess === 'boolean' ? isSuccess : true
+                    token: isBoolean(options.isSuccess) ? tokenToH5 : '',
+                    isSafe: typeof options.isSuccess === 'boolean' ? options.isSuccess : true
                   }
                 };
                 sendData(json);
@@ -542,7 +542,7 @@
      * @file ird-JSBridge的api入口
      */
     var index = {
-      version: '1.0.4',
+      version: '1.0.5',
 
       switchMode(options) {
         const {

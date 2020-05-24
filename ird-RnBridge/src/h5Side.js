@@ -69,16 +69,16 @@ export const H5SideApi = (function () {
             const fn = isSuccess ? h5Callback[cbId] : h5CallbackFail[cbId];
             delete h5Callback[cbId];
             delete h5CallbackFail[cbId];
-            fn(params);
+            fn && fn(params);
         }
     }
     function invokeH5Api(method, response, callbackId) {
         const fn = h5ApiMap[method];
-        const partialSend = (isSuccess, result) => {
+        const partialSend = (options) => {
             let json = {
                 type: RnSide.types.RCB,
                 callbackId,
-                response: { isSuccess, params: result }
+                response: { isSuccess: options.isSuccess, params: options.result }
             };
             sendData(json);
         };
