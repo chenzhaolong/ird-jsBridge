@@ -544,7 +544,7 @@
      * @file ird-JSBridge的api入口
      */
     var index = {
-      version: '1.0.0',
+      version: '1.0.2',
 
       switchMode(options) {
         const {

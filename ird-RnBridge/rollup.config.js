@@ -6,6 +6,8 @@ import babel from 'rollup-plugin-babel';
 import fileSize from 'rollup-plugin-filesize';
 import json from 'rollup-plugin-json';
 import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace';
+const pkg = require('./package');
 
 export default {
     input: './index.js',
@@ -20,6 +22,7 @@ export default {
         }),
         babel({ exclude: 'node_modules/**' }),
         fileSize(),
-        json()
+        json(),
+        replace({ __VERSION__: pkg.version })
     ]
 };

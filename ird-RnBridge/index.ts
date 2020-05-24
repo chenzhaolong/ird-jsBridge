@@ -5,7 +5,7 @@ import { H5SideApi } from './src/h5Side';
 import { RnSideApi } from './src/rnSide';
 
 export default {
-    version: '1.0.0',
+    version: '__VERSION__',
 
     switchMode(options: any) {
         const {mode} = options;
