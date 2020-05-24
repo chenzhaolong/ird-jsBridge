@@ -9,8 +9,8 @@ interface/rnSide.ts
 node_modules/
 
 #src
-src/h5/Side.ts
-src/h5/rnSide.ts
+src/h5Side.ts
+src/rnSide.ts
 
 #utils
 utils/index.ts
