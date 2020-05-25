@@ -107,16 +107,16 @@ export const RnSideApi = (function () {
                 const fn = RnApiMap['checkSafety'];
                 const RnApiMapKeys = Object.keys(RnApiMap);
                 if (fn && typeof fn === 'function') {
-                    const partialSend = (options: {isSuccess: boolean}) => {
+                    const partialSend = (options: {isSuccess?: boolean} = {}) => {
                         // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                         tokenToH5 = getUID();
                         const json = {
                             type: H5Side.types.SAFETY,
                             callbackId,
                             response: {
-                                RnApiMapKeys,
+                                RnApiMapKeys: isBoolean(options.isSuccess) ? RnApiMapKeys : [],
                                 token: isBoolean(options.isSuccess) ? tokenToH5 : '',
-                                isSafe: typeof options.isSuccess === 'boolean' ? options.isSuccess : true
+                                isSafe: isBoolean(options.isSuccess) && true
                             }
                         };
                         sendData(json);
