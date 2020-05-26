@@ -51,7 +51,7 @@ export const RnSideApi = (function () {
         if (token === tokenToH5) {
             const fn = RnApiMap[method];
             if (fn && typeof fn === 'function') {
-                const partialSend = (options: {isSuccess: boolean, result: any}) => {
+                const partialSend = (options: {isSuccess?: boolean, result?: any} = {}) => {
                     const json = {
                         type: H5Side.types.HCB,
                         callbackId,

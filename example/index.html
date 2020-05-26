@@ -7,6 +7,7 @@
 <body>
   <div style="width: 100px; height: 200px; color: red" id="demo">nihao12</div>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
+  <script src="./vConsole.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
       // document.addEventListener('message', (e) => {
@@ -14,7 +15,31 @@
       // });
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
-      })
+      });
+      RnBridge.invokeRN({
+          method: 'a1',
+          params: {a1: 12},
+          success: (result) => {
+              document.getElementById('demo').style.color = 'green';
+              document.getElementById('demo').innerText = JSON.stringify(result);
+          },
+          fail: (result) => {
+              document.getElementById('demo').style.color = 'red';
+              document.getElementById('demo').innerText = JSON.stringify(result);
+          }
+      });
+      RnBridge.invokeRN({
+          method: 'a2',
+          params: {a2: 122},
+          success: (result) => {
+              document.getElementById('demo').style.color = 'green';
+              document.getElementById('demo').innerText = JSON.stringify(result);
+          },
+          fail: (result) => {
+              document.getElementById('demo').style.color = 'red';
+              document.getElementById('demo').innerText = JSON.stringify(result);
+          }
+      });
   </script>
 </body>
 </html>

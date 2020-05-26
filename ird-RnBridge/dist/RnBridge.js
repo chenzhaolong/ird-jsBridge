@@ -95,7 +95,9 @@
 
       let h5CbId = 0; // 错误处理
 
-      let errorHandle; // 监听
+      let errorHandle; // 临时消费队列
+
+      let consumeQueue = []; // 监听
 
       function listenEvent() {
         if (document) {
@@ -156,6 +158,17 @@
             isSuccess: true,
             params: ''
           });
+
+          if (consumeQueue.length > 0) {
+            consumeQueue.forEach(json => {
+              // @ts-ignore
+              json.response.token = tokenFromRn;
+              sendData(json);
+            });
+            consumeQueue = [];
+          }
+        } else if (consumeQueue.length > 0) {
+          consumeQueue = [];
         }
       } // 调用H5Callback回调
 
@@ -214,14 +227,22 @@
 
       function sendData(data) {
         if (window) {
-          const params = JSON.stringify(data); // @ts-ignore
-
-          window.postMessage(params);
+          const params = JSON.stringify(data);
+          setTimeout(() => {
+            // @ts-ignore
+            window.postMessage(params);
+          }, 1000);
         }
       }
 
       function caniuse(method) {
         return RnApiMap.indexOf(method) !== -1;
+      } // 是否验证成功
+
+
+      function isCheckSuccess() {
+        // @ts-ignore
+        return tokenFromRn && RnApiMap.length > 0 && true;
       }
 
       return {
@@ -253,9 +274,7 @@
             data.callbackId = registerKey;
           }
 
-          setTimeout(() => {
-            sendData(data);
-          }, 1000);
+          sendData(data);
         },
 
         /**
@@ -269,11 +288,6 @@
             success,
             fail
           } = options;
-
-          if (!caniuse(method)) {
-            return;
-          }
-
           let json = {
             type: RnSide.types.RAPI,
             response: {
@@ -288,7 +302,13 @@
             json.callbackId = registerKey;
           }
 
-          sendData(json);
+          if (isCheckSuccess()) {
+            if (caniuse(method)) {
+              sendData(json);
+            }
+          } else {
+            consumeQueue.push(json);
+          }
         },
 
         /**
@@ -366,7 +386,7 @@
           const fn = RnApiMap[method];
 
           if (fn && typeof fn === 'function') {
-            const partialSend = options => {
+            const partialSend = (options = {}) => {
               const json = {
                 type: H5Side.types.HCB,
                 callbackId,
@@ -438,16 +458,16 @@
             const RnApiMapKeys = Object.keys(RnApiMap);
 
             if (fn && typeof fn === 'function') {
-              const partialSend = options => {
+              const partialSend = (options = {}) => {
                 // tokenToH5 = md5(`rn_${Math.round(Math.random() * 1000)}_${Date.now()}`);
                 tokenToH5 = getUID();
                 const json = {
                   type: H5Side.types.SAFETY,
                   callbackId,
                   response: {
-                    RnApiMapKeys,
+                    RnApiMapKeys: isBoolean(options.isSuccess) ? RnApiMapKeys : [],
                     token: isBoolean(options.isSuccess) ? tokenToH5 : '',
-                    isSafe: typeof options.isSuccess === 'boolean' ? options.isSuccess : true
+                    isSafe: isBoolean(options.isSuccess) && true
                   }
                 };
                 sendData(json);

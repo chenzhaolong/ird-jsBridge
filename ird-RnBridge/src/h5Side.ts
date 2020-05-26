@@ -27,6 +27,9 @@ export const H5SideApi = (function() {
     // 错误处理
     let errorHandle: any;
 
+    // 临时消费队列
+    let consumeQueue: Array<any> = [];
+
     // 监听
     function listenEvent() {
         if (document) {
@@ -68,6 +71,16 @@ export const H5SideApi = (function() {
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
             invokeCallback(callbackId, {isSuccess: true, params: ''});
+            if (consumeQueue.length > 0) {
+                consumeQueue.forEach((json: object) => {
+                    // @ts-ignore
+                    json.response.token = tokenFromRn;
+                    sendData(json);
+                });
+                consumeQueue = [];
+            }
+        } else if (consumeQueue.length > 0) {
+            consumeQueue = []
         }
     }
 
@@ -115,13 +128,21 @@ export const H5SideApi = (function() {
     function sendData(data: any) {
         if (window) {
             const params = JSON.stringify(data);
-            // @ts-ignore
-            window.postMessage(params);
+            setTimeout(() => {
+                // @ts-ignore
+                window.postMessage(params);
+            }, 1000);
         }
     }
 
     function caniuse (method: string): boolean {
         return RnApiMap.indexOf(method) !== -1;
+    }
+
+    // 是否验证成功
+    function isCheckSuccess (): boolean {
+        // @ts-ignore
+        return tokenFromRn && RnApiMap.length > 0 && true
     }
 
     return {
@@ -151,9 +172,7 @@ export const H5SideApi = (function() {
             if (registerKey) {
                 data.callbackId = registerKey
             }
-            setTimeout(() => {
-                sendData(data);
-            }, 1000);
+            sendData(data);
         },
 
         /**
@@ -162,9 +181,6 @@ export const H5SideApi = (function() {
          */
         invokeRN(options: H5Side.InvokeRnparams) {
             const {method, params, success, fail} = options;
-            if (!caniuse(method)) {
-                return;
-            }
             let json: RnSide.RnParams = {
                 type: RnSide.types.RAPI,
                 response: {params, token: tokenFromRn},
@@ -174,8 +190,13 @@ export const H5SideApi = (function() {
             if (registerKey) {
                 json.callbackId = registerKey
             }
-
-            sendData(json);
+            if (isCheckSuccess()) {
+                if (caniuse(method)) {
+                    sendData(json);
+                }
+            } else {
+                consumeQueue.push(json);
+            }
         },
 
         /**
