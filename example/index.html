@@ -10,11 +10,23 @@
   <script src="./vConsole.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
-      // document.addEventListener('message', (e) => {
-      //     document.getElementById('demo').innerText = e.data;
-      // });
+      RnBridge.initH5({
+          h1: (params, send) => {
+              alert(JSON.stringify(params));
+              send({isSuccess: true, result: {a2: 39}});
+          },
+          h2: (params, send) => {
+              alert(JSON.stringify(params));
+              send({isSuccess: false, result: {a1: 21}});
+          }
+      });
+      RnBridge.extends('setTitle', (title) => {
+          alert('ad')
+          RnBridge.invokeRN({method: 'setTitle', params: {name: title}})
+      });
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
+          RnBridge.setTitle('设置');
       });
       RnBridge.invokeRN({
           method: 'a1',
@@ -39,6 +51,10 @@
               document.getElementById('demo').style.color = 'red';
               document.getElementById('demo').innerText = JSON.stringify(result);
           }
+      });
+      RnBridge.listenRN('h3', (params, send) => {
+          alert(JSON.stringify(params));
+          send({isSuccess: false, result: {a11: 490}});
       });
   </script>
 </body>

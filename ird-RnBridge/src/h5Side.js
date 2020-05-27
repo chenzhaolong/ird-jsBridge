@@ -102,6 +102,10 @@ export const H5SideApi = (function () {
     // 注册h5的回调函数
     function registerCb(success, fail) {
         if (success && typeof success === 'function') {
+            // 超出极限，从零开始
+            if (h5CbId >= Number.MAX_SAFE_INTEGER) {
+                h5CbId = 0;
+            }
             h5CbId += 1;
             // const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
             const registerKey = getUID1(`h5_${h5CbId}_${Date.now()}`);
@@ -197,9 +201,9 @@ export const H5SideApi = (function () {
          */
         extends(method, cb) {
             // @ts-ignore
-            if (!window.RnJsBridge[method]) {
+            if (!window.RnBridge[method]) {
                 // @ts-ignore
-                window.RnJsBridge[method] = cb;
+                window.RnBridge[method] = cb;
             }
         }
     };

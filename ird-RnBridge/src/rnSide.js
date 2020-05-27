@@ -27,6 +27,10 @@ export const RnSideApi = (function () {
     // 注册h5的回调函数
     function registerCb(success, fail) {
         if (success && typeof success === 'function') {
+            // 超出极限，从零开始
+            if (rnCbId >= Number.MAX_SAFE_INTEGER) {
+                rnCbId = 0;
+            }
             rnCbId += 1;
             const registerKey = getUID1(`rn_${rnCbId}_${Date.now()}`);
             RnCallback[registerKey] = success;

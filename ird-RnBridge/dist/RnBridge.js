@@ -210,6 +210,11 @@
 
       function registerCb(success, fail) {
         if (success && typeof success === 'function') {
+          // 超出极限，从零开始
+          if (h5CbId >= Number.MAX_SAFE_INTEGER) {
+            h5CbId = 0;
+          }
+
           h5CbId += 1; // const registerKey = md5(`h5_${h5CbId}_${Date.now()}`);
 
           const registerKey = getUID1(`h5_${h5CbId}_${Date.now()}`);
@@ -326,9 +331,9 @@
          */
         extends(method, cb) {
           // @ts-ignore
-          if (!window.RnJsBridge[method]) {
+          if (!window.RnBridge[method]) {
             // @ts-ignore
-            window.RnJsBridge[method] = cb;
+            window.RnBridge[method] = cb;
           }
         }
 
@@ -362,6 +367,11 @@
 
       function registerCb(success, fail) {
         if (success && typeof success === 'function') {
+          // 超出极限，从零开始
+          if (rnCbId >= Number.MAX_SAFE_INTEGER) {
+            rnCbId = 0;
+          }
+
           rnCbId += 1;
           const registerKey = getUID1(`rn_${rnCbId}_${Date.now()}`);
           RnCallback[registerKey] = success;
@@ -562,7 +572,7 @@
      * @file ird-JSBridge的api入口
      */
     var index = {
-      version: '1.0.5',
+      version: '1.0.6',
 
       switchMode(options) {
         const {
