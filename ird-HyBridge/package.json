@@ -1,8 +1,8 @@
 {
-  "name": "ird-rnbridge",
-  "version": "1.0.7",
-  "main": "./dist/RnBridge.js",
+  "name": "ird-hybridge",
+  "version": "1.0.0",
   "dependencies": {},
+  "main": "./dist/HyBridge.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
