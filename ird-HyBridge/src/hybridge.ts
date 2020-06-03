@@ -1,10 +1,12 @@
 /**
  * @file 主体部分
  */
-import { TypeJS, TypeNA } from '../interface/constans';
+import { TypeJS, TypeNA, injectScheme } from '../interface/constans';
 import { postMessage } from '../utils/postMessage';
+import { Options } from '../interface/HyBridge';
 
 export const _Hybridge = (function() {
+
     // 回调ID
     let _cbId: number = 0;
 
@@ -30,18 +32,19 @@ export const _Hybridge = (function() {
     let _lastTimeForInvoke: number = Date.now();
 
     return {
+        // 注册hybridg通信的协议
+        injectScheme: injectScheme,
+
+        // 初始化
         init() {},
         register() {},
         listen() {},
         emit() {},
         invoke() {},
-        getInfo() {},
         extends() {},
         error() {},
         debug() {},
         invokeByNative() {},
-        invokeJs() {
-
-        }
+        invokeJs() {}
     }
 })();
