@@ -1,7 +1,7 @@
 /**
  * @file 发起跨端请求
  */
-import {isAndroid, isIos, isUiWebview, isWkWebview} from './ua';
+import { isIos, isWkWebview} from './ua';
 import { BridgeScheme } from '../interface/constans';
 
 function sendForAndroid(json: string) {

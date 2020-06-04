@@ -4,11 +4,14 @@
 import {Options} from './HyBridge';
 
 export enum TypeNA {
-    CHECKSAFETY = 'checkSafety'
+    CHECKSAFETY = 'checkSafety',
+    NA = 'na',
+    NACB = 'naCb'
 }
 
 export enum TypeJS {
-    SAFETY = 'safety'
+    SAFETY = 'safety',
+    JSCB = 'jsCb'
 }
 
 export const UA: string =  window.navigator.userAgent || '';
