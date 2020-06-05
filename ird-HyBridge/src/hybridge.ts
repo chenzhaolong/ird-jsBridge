@@ -4,10 +4,12 @@
 import { TypeJS, TypeNA, injectScheme } from '../interface/constans';
 import { postMessage } from '../utils/postMessage';
 import {getUID1} from '../utils/tools';
-import { InitResponse } from "../interface/HyBridge";
+import { InitResponse, InvokeOptions, CbOptions } from "../interface/HyBridge";
 import {isArray, isFunction} from "../utils/tools";
 
 export const _Hybridge = (function() {
+    // 初始化状态
+    let initStatue: string = 'pending';
 
     // 回调ID
     let _cbId: number = 0;
@@ -35,7 +37,7 @@ export const _Hybridge = (function() {
     // 上一次调用的时间
     let _lastTimeForInvoke: number = Date.now();
 
-    function registerCb (success: (data: any) => {}, fail: any) {
+    function registerCb (success: (data: any) => void, fail: any) {
         if (success && typeof success === 'function') {
             // 超出极限，从零开始
             if (_cbId >= Number.MAX_SAFE_INTEGER) {
@@ -56,25 +58,33 @@ export const _Hybridge = (function() {
         const {callbackId = '', nativeMethods = [], token} = response;
         if (token) {
             _naToken = token;
+            initStatue = 'success';
+        } else {
+            initStatue = 'fail';
+            _tmpQueueForJS = [];
         }
         if (isArray(nativeMethods)) {
             _naMethods = nativeMethods
         }
         if (token) {
-            _naToken = token;
             const fn = _cbSuccessCollection[callbackId];
             isFunction(fn) && fn();
         }
         if (_tmpQueueForJS.length > 0) {
-            if (token) {
-                _tmpQueueForJS.forEach(json => {
-                    json.token = _naToken;
-                    postMessage(json);
-                })
-            } else {
-                _tmpQueueForJS = [];
-            }
+            _tmpQueueForJS.forEach(json => {
+                json.token = _naToken;
+                postMessage(json);
+            });
+            _tmpQueueForJS = []
         }
+    }
+
+    function executeJsCb (response: any) {
+        const {result, callbackId, isSuccess} = response;
+        const fn = isSuccess ? _cbSuccessCollection[callbackId] : _cbFailCollection[callbackId];
+        delete _cbFailCollection[callbackId];
+        delete _cbSuccessCollection[callbackId];
+        isFunction(fn) && fn (result);
     }
 
     function canIUse (method: string): boolean {
@@ -109,18 +119,54 @@ export const _Hybridge = (function() {
             if (response.type === TypeJS.SAFETY) {
                 executeInit(response)
             } else if (response.type === TypeJS.JSCB) {
+                executeJsCb(response)
+            }
+        },
 
+        invoke(options: InvokeOptions) {
+            const {methodName, params, success, fail} = options;
+            if (initStatue === 'fail') {
+                return false;
+            }
+            const json: any = {
+                methodName: methodName,
+                params: params,
+                type: TypeNA.NA
+            };
+            const callbackId = registerCb(success, fail);
+            if (callbackId) {
+                json.callbackId = callbackId
+            }
+            if (initStatue === 'success') {
+                if (canIUse(methodName)) {
+                    json.token = _naToken;
+                    postMessage(json);
+                }
+            } else {
+                _tmpQueueForJS.push(json);
             }
         },
 
         register() {},
-        listen() {},
-        emit() {},
-        invoke() {},
-        extends() {},
-        error() {},
-        debug() {},
 
-        invokeJs() {}
+        invokeJs() {},
+
+        listen(event: string, cb: (data: any) => void, isNative: boolean) {},
+
+        emit(event: string, data: any, isNative: boolean) {
+
+        },
+
+        extends(method: string, cb: (params: any) => any) {
+            // @ts-ignore
+            if (!window.Hybridge[method]) {
+                // @ts-ignore
+                window.Hybridge[method] = cb
+            }
+        }
+
+        // error() {},
+
+        // debug() {},
     }
 })();
