@@ -12,8 +12,15 @@ export interface Options {
 export interface InitResponse {
     type?: TypeJS,
     callbackId?: string,
-    nativeMethods?: Array<any>,
+    result?: Array<any>,
     token?: string
+}
+
+export interface CbOptions {
+    type: TypeJS,
+    callbackId: string,
+    result: any,
+    isSuccess?: boolean
 }
 
 export interface InvokeOptions {
@@ -23,9 +30,9 @@ export interface InvokeOptions {
     fail: (data: any) => void
 }
 
-export interface CbOptions {
-    result: any,
-    callbackId: string,
-    isSuccess: boolean,
-    type: TypeJS
+export interface NaInvokeJs {
+    methodName: string,
+    params: any,
+    callbackId?: string,
+    type?: TypeJS
 }

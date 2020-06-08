@@ -4,8 +4,8 @@
 import { TypeJS, TypeNA, injectScheme } from '../interface/constans';
 import { postMessage } from '../utils/postMessage';
 import {getUID1} from '../utils/tools';
-import { InitResponse, InvokeOptions, CbOptions } from "../interface/HyBridge";
-import {isArray, isFunction} from "../utils/tools";
+import { InitResponse, InvokeOptions, CbOptions, NaInvokeJs } from "../interface/HyBridge";
+import {isArray, isFunction, isObject} from "../utils/tools";
 
 export const _Hybridge = (function() {
     // 初始化状态
@@ -55,7 +55,7 @@ export const _Hybridge = (function() {
     }
 
     function executeInit (response: InitResponse) {
-        const {callbackId = '', nativeMethods = [], token} = response;
+        const {callbackId = '', result = [], token} = response;
         if (token) {
             _naToken = token;
             initStatue = 'success';
@@ -63,8 +63,8 @@ export const _Hybridge = (function() {
             initStatue = 'fail';
             _tmpQueueForJS = [];
         }
-        if (isArray(nativeMethods)) {
-            _naMethods = nativeMethods
+        if (isArray(result)) {
+            _naMethods = result
         }
         if (token) {
             const fn = _cbSuccessCollection[callbackId];
@@ -109,10 +109,11 @@ export const _Hybridge = (function() {
             postMessage(data);
         },
 
-        invokeByNative(json: string) {
-            let response: InitResponse;
+        // 被原生调用
+        invokeByNative(json: any) {
+            let response: InitResponse | CbOptions;
             try {
-                response = JSON.parse(json);
+                response = isObject(json) ? json : JSON.parse(json);
             } catch(e) {
                 response = {}
             }
@@ -123,6 +124,7 @@ export const _Hybridge = (function() {
             }
         },
 
+        // 调用原生方法
         invoke(options: InvokeOptions) {
             const {methodName, params, success, fail} = options;
             if (initStatue === 'fail') {
@@ -147,9 +149,43 @@ export const _Hybridge = (function() {
             }
         },
 
-        register() {},
+        // 提供na调用的js方法
+        registerAll(array: object) {
+          if (Object.keys(_jsCollection).length > 0) {
+              _jsCollection = {..._jsCollection, ...array};
+          } else {
+              _jsCollection = array
+          }
+        },
 
-        invokeJs() {},
+        // 提供na调用的js方法
+        register(methodName: string, cb: () => any) {
+            if (!_jsCollection[methodName]) {
+                _jsCollection[methodName] = cb;
+            }
+        },
+
+        // 原生调用js
+        invokeJs(options: any) {
+            let request: NaInvokeJs;
+            try {
+                request = isObject(options) ? options : JSON.parse(options);
+            } catch (e) {
+                request = {methodName: '', params: '', callbackId: ''}
+            }
+            const fn = _jsCollection[request.methodName];
+            if ( isFunction(fn) && initStatue === 'success') {
+                const send = (result: any) => {
+                    const json = {
+                        params: result,
+                        type: TypeNA.NACB,
+                        callbackId: request.callbackId || ''
+                    };
+                    postMessage(json);
+                };
+                fn(request.params, send)
+            }
+        },
 
         listen(event: string, cb: (data: any) => void, isNative: boolean) {},
 
@@ -157,6 +193,7 @@ export const _Hybridge = (function() {
 
         },
 
+        // 扩展桥对象
         extends(method: string, cb: (params: any) => any) {
             // @ts-ignore
             if (!window.Hybridge[method]) {
@@ -164,9 +201,5 @@ export const _Hybridge = (function() {
                 window.Hybridge[method] = cb
             }
         }
-
-        // error() {},
-
-        // debug() {},
     }
 })();
