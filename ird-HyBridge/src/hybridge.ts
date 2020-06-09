@@ -103,6 +103,8 @@ export const _Hybridge = (function() {
     }
 
     return {
+        version: '__VERSION__',
+
         // 注册hybridg通信的协议
         injectScheme: injectScheme,
 

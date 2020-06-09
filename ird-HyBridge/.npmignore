@@ -1,0 +1,22 @@
+#interface
+interface/constants.ts
+interface/HyBridge.ts
+
+#Dependency directories
+node_modules/
+
+#src
+src/hybridge.ts
+src/index.ts
+
+#utils
+utils/event.ts
+utils/postMessage.ts
+utils/tools.ts
+utils/ua.ts
+
+#root
+rollup.config.js
+tsconfig.json
+
+.idea/

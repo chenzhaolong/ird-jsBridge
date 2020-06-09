@@ -4,7 +4,8 @@
   "description": "hybird and react-native js",
   "main": "ird-RnBridge/index.ts",
   "scripts": {
-    "build-rn": "sh ./bin/compiler.sh"
+    "build-rn": "sh ./bin/compiler.sh",
+    "build-hy": "sh ./bin/compilerHy.sh"
   },
   "repository": {
     "type": "git",

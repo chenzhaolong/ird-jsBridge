@@ -10,7 +10,6 @@
     "./index.ts",
     "./src/*.ts",
     "./interface/*.ts",
-    "./constant/*.ts",
     "./utils/*.ts"
   ]
 }
