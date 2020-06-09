@@ -6,6 +6,7 @@ import { postMessage } from '../utils/postMessage';
 import {getUID1} from '../utils/tools';
 import { InitResponse, InvokeOptions, CbOptions, NaInvokeJs } from "../interface/HyBridge";
 import {isArray, isFunction, isObject} from "../utils/tools";
+import { createHook } from "../utils/event";
 
 export const _Hybridge = (function() {
     // 初始化状态
@@ -16,9 +17,6 @@ export const _Hybridge = (function() {
 
     // 临时js队列
     let _tmpQueueForJS: Array<any> = [];
-
-    // 临时Na队列
-    let _tmpQueueForNA: Array<any> = [];
 
     // 验证成功后回传的token
     let _naToken: string = '';
@@ -187,10 +185,22 @@ export const _Hybridge = (function() {
             }
         },
 
-        listen(event: string, cb: (data: any) => void, isNative: boolean) {},
+        // 监听原生发射的事件
+        listen(event: string, cb: (data: any) => void) {
+            const hook = createHook();
+            hook.listen(event, cb);
+        },
 
-        emit(event: string, data: any, isNative: boolean) {
+        // 发射事件
+        emit(event: string, data: any) {
+            const hook = createHook();
+            hook.emit(event, data);
+        },
 
+        // 删除事件
+        remove(event: string) {
+            const hook = createHook();
+            hook.remove(event);
         },
 
         // 扩展桥对象
