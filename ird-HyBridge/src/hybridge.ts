@@ -35,6 +35,8 @@ export const _Hybridge = (function() {
     // 上一次调用的时间
     let _lastTimeForInvoke: number = Date.now();
 
+    let BETWEEN_INVOKE_TIME: number = 100;
+
     function registerCb (success: (data: any) => void, fail: any) {
         if (success && typeof success === 'function') {
             // 超出极限，从零开始
@@ -71,7 +73,7 @@ export const _Hybridge = (function() {
         if (_tmpQueueForJS.length > 0) {
             _tmpQueueForJS.forEach(json => {
                 json.token = _naToken;
-                postMessage(json);
+                proxyPostMessage(json);
             });
             _tmpQueueForJS = []
         }
@@ -89,6 +91,17 @@ export const _Hybridge = (function() {
         return _naMethods.indexOf(method) !== -1;
     }
 
+    function proxyPostMessage (data: any) {
+        if (Date.now() - _lastTimeForInvoke < BETWEEN_INVOKE_TIME) {
+            setTimeout(() => {
+                proxyPostMessage(data);
+            }, BETWEEN_INVOKE_TIME);
+        } else {
+            _lastTimeForInvoke = Date.now();
+            postMessage(data);
+        }
+    }
+
     return {
         // 注册hybridg通信的协议
         injectScheme: injectScheme,
@@ -104,7 +117,7 @@ export const _Hybridge = (function() {
             if (registerKey) {
                 data.callbackId = registerKey;
             }
-            postMessage(data);
+            proxyPostMessage(data);
         },
 
         // 被原生调用
@@ -140,7 +153,7 @@ export const _Hybridge = (function() {
             if (initStatue === 'success') {
                 if (canIUse(methodName)) {
                     json.token = _naToken;
-                    postMessage(json);
+                    proxyPostMessage(json);
                 }
             } else {
                 _tmpQueueForJS.push(json);
@@ -179,7 +192,7 @@ export const _Hybridge = (function() {
                         type: TypeNA.NACB,
                         callbackId: request.callbackId || ''
                     };
-                    postMessage(json);
+                    proxyPostMessage(json);
                 };
                 fn(request.params, send)
             }
