@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+   <div>ird-hybridge</div>
+   <script type="text/javascript" src="../ird-HyBridge/dist/HyBridge.js"></script>
+   <script type="text/javascript">
+       console.log(HyBridge)
+       HyBridge.injectScheme({
+           ui: 'dragon',
+           wk: 'dragon',
+           android: 'dragon'
+       });
+       HyBridge.invoke({
+           methodName: 'A',
+           params: {},
+           success: function() {}
+       });
+       HyBridge.extends('setTitle', (a) => {
+           console.log(a)
+       })
+   </script>
+</body>
+</html>
