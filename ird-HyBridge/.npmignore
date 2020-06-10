@@ -1,5 +1,5 @@
 #interface
-interface/constants.ts
+interface/constans.ts
 interface/HyBridge.ts
 
 #Dependency directories
