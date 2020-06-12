@@ -1,6 +1,6 @@
 {
   "name": "ird-hybridge",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": {},
   "main": "./dist/HyBridge.js",
   "scripts": {
