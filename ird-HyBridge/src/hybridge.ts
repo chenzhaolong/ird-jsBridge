@@ -73,8 +73,10 @@ export const _Hybridge = (function() {
         }
         if (_tmpQueueForJS.length > 0) {
             _tmpQueueForJS.forEach(json => {
-                json.token = _naToken;
-                proxyPostMessage(json);
+                if (canIUse(json.methodName)) {
+                    json.token = _naToken;
+                    proxyPostMessage(json);
+                }
             });
             _tmpQueueForJS = []
         }
