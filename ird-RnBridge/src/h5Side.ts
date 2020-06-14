@@ -74,8 +74,11 @@ export const H5SideApi = (function() {
             if (consumeQueue.length > 0) {
                 consumeQueue.forEach((json: object) => {
                     // @ts-ignore
-                    json.response.token = tokenFromRn;
-                    sendData(json);
+                    if (caniuse(json.method)) {
+                        // @ts-ignore
+                        json.response.token = tokenFromRn;
+                        sendData(json);
+                    }
                 });
                 consumeQueue = [];
             }
@@ -101,7 +104,7 @@ export const H5SideApi = (function() {
             let json = {
                 type: RnSide.types.RCB,
                 callbackId,
-                response: {isSuccess: options.isSuccess, params: options.result}
+                response: {isSuccess: options.isSuccess, params: options.result, token: tokenFromRn}
             };
             sendData(json);
         };

@@ -75,8 +75,8 @@ export const RnSideApi = (function () {
     }
 
     function invokeRnCb(response: any, callbackId: string) {
-        const {isSuccess, params} = response;
-        if (callbackId) {
+        const {isSuccess, params, token} = response;
+        if (callbackId && token === tokenToH5) {
             const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
             delete RnCallback[callbackId];
             delete RnCallbackFail[callbackId];
