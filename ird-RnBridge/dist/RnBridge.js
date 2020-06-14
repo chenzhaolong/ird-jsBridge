@@ -162,8 +162,11 @@
           if (consumeQueue.length > 0) {
             consumeQueue.forEach(json => {
               // @ts-ignore
-              json.response.token = tokenFromRn;
-              sendData(json);
+              if (caniuse(json.method)) {
+                // @ts-ignore
+                json.response.token = tokenFromRn;
+                sendData(json);
+              }
             });
             consumeQueue = [];
           }
@@ -196,7 +199,8 @@
             callbackId,
             response: {
               isSuccess: options.isSuccess,
-              params: options.result
+              params: options.result,
+              token: tokenFromRn
             }
           };
           sendData(json);
@@ -422,10 +426,11 @@
       function invokeRnCb(response, callbackId) {
         const {
           isSuccess,
-          params
+          params,
+          token
         } = response;
 
-        if (callbackId) {
+        if (callbackId && token === tokenToH5) {
           const fn = isSuccess ? RnCallback[callbackId] : RnCallbackFail[callbackId];
           delete RnCallback[callbackId];
           delete RnCallbackFail[callbackId];
@@ -572,7 +577,7 @@
      * @file ird-JSBridge的api入口
      */
     var index = {
-      version: '1.0.6',
+      version: '1.0.7',
 
       switchMode(options) {
         const {
