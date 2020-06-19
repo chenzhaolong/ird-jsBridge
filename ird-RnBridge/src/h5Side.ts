@@ -132,6 +132,10 @@ export const H5SideApi = (function() {
         return ''
     }
 
+    /**
+     * todo: 优化这里的发送逻辑，详情可以参考：
+     * https://github.com/facebook/react-native/issues/11594
+     */
     function sendData(data: any) {
         if (window) {
             const params = JSON.stringify(data);
