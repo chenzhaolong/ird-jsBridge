@@ -1,5 +1,6 @@
 /**
  * @file h5端的jsBridge的api
+ * todo: 1）添加钩子函数
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
@@ -133,7 +134,7 @@ export const H5SideApi = (function() {
     }
 
     /**
-     * todo: 优化这里的发送逻辑，详情可以参考：
+     * todo: 2）优化这里的发送逻辑，详情可以参考：
      * https://github.com/facebook/react-native/issues/11594
      */
     function sendData(data: any) {
