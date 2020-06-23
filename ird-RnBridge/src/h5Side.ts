@@ -31,6 +31,47 @@ export const H5SideApi = (function() {
     // 临时消费队列
     let consumeQueue: Array<any> = [];
 
+    // 异步等待postMessage重定义成功
+    function awaitPostMessage () {
+        let queue: Array<any> = [];
+        // @ts-ignore
+        let isReactNativePostMessageReady = !!window.originalPostMessage;
+
+        let currentPostMessage = (message: any) => {
+            // 不需要token
+            if (message.type === RnSide.types.CHECKSAFETY) {
+                if (queue.length > 0) {
+                    queue.shift();
+                }
+                queue.push(message);
+            } else {
+                // 需要token
+                consumeQueue.push(message);
+            }
+        };
+
+        const sendQueue = () => {
+            while (queue.length > 0) {
+                sendData(queue.shift());
+            }
+        };
+
+        if (!isReactNativePostMessageReady) {
+            Object.defineProperty(window, 'postMessage', {
+                configurable: true,
+                enumerable: true,
+                get () {
+                    return currentPostMessage;
+                },
+                set(fn) {
+                    isReactNativePostMessageReady = true;
+                    currentPostMessage = fn;
+                    setTimeout(sendQueue, 0);
+                }
+            });
+        }
+    }
+
     // 监听
     function listenEvent() {
         if (document) {
@@ -134,16 +175,13 @@ export const H5SideApi = (function() {
     }
 
     /**
-     * todo: 2）优化这里的发送逻辑，详情可以参考：
      * https://github.com/facebook/react-native/issues/11594
      */
     function sendData(data: any) {
         if (window) {
             const params = JSON.stringify(data);
-            setTimeout(() => {
-                // @ts-ignore
-                window.postMessage(params);
-            }, 1000);
+            // @ts-ignore
+            window.postMessage(params);
         }
     }
 
@@ -184,6 +222,7 @@ export const H5SideApi = (function() {
             if (registerKey) {
                 data.callbackId = registerKey
             }
+            awaitPostMessage();
             sendData(data);
         },
 
