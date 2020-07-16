@@ -38,6 +38,7 @@ export const H5SideApi = (function() {
         let isReactNativePostMessageReady = !!window.originalPostMessage;
 
         let currentPostMessage = (message: any) => {
+            message = JSON.parse(message);
             // 不需要token
             if (message.type === RnSide.types.CHECKSAFETY) {
                 if (queue.length > 0) {
@@ -69,6 +70,17 @@ export const H5SideApi = (function() {
                     setTimeout(sendQueue, 0);
                 }
             });
+        }
+    }
+
+    /**
+     * https://github.com/facebook/react-native/issues/11594
+     */
+    function sendData(data: any) {
+        if (window) {
+            const params = JSON.stringify(data);
+            // @ts-ignore
+            window.postMessage(params);
         }
     }
 
@@ -172,17 +184,6 @@ export const H5SideApi = (function() {
             return registerKey
         }
         return ''
-    }
-
-    /**
-     * https://github.com/facebook/react-native/issues/11594
-     */
-    function sendData(data: any) {
-        if (window) {
-            const params = JSON.stringify(data);
-            // @ts-ignore
-            window.postMessage(params);
-        }
     }
 
     function caniuse (method: string): boolean {

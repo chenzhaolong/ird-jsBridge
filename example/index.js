@@ -11,13 +11,13 @@ const server = http.createServer((req, res) => {
     let suffix = req.url.substr(req.url.length - 2, req.url.length);
     if (suffix === 'js') {
         res.writeHead(200,{"content-type":"application/javascript"});
-        const htmlPath = path.join(__dirname, '../ird-HyBridge/dist/HyBridge.js');
+        const htmlPath = path.join(__dirname, '../ird-RnBridge/dist/RnBridge.js');
         const html = fs.readFileSync(htmlPath);
         res.write(html);
         res.end();
     } else {
         res.writeHead(200,{"content-type":"text/html"});
-        const htmlPath = path.join(__dirname, './index1.html');
+        const htmlPath = path.join(__dirname, './index.html');
         const html = fs.readFileSync(htmlPath);
         res.write(html);
         res.end();

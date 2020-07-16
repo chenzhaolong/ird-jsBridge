@@ -172,6 +172,11 @@ export const RnSideApi = (function () {
                 case RnSide.types.ERROR:
                     break;
             }
+        },
+        /**
+         * 性能数据
+         **/
+        performance() {
         }
     };
 })();

@@ -1,5 +1,6 @@
 /**
  * @file h5端的jsBridge的api
+ * todo: 1）添加钩子函数
  */
 import { H5Side } from '../interface/h5Side';
 export declare const H5SideApi: {

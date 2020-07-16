@@ -7,7 +7,6 @@
 <body>
   <div style="width: 100px; height: 200px; color: red" id="demo">nihao12</div>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
-  <script src="./vConsole.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
       RnBridge.initH5({
@@ -20,13 +19,13 @@
               send({isSuccess: false, result: {a1: 21}});
           }
       });
-      RnBridge.extends('setTitle', (title) => {
-          alert('ad')
-          RnBridge.invokeRN({method: 'setTitle', params: {name: title}})
-      });
+      // RnBridge.extends('setTitle', (title) => {
+      //     alert('ad')
+      //     RnBridge.invokeRN({method: 'setTitle', params: {name: title}})
+      // });
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
-          RnBridge.setTitle('设置');
+          // RnBridge.setTitle('设置');
       });
       RnBridge.invokeRN({
           method: 'a1',

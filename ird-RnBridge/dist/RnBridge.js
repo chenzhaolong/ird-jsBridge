@@ -80,6 +80,7 @@
 
     /**
      * @file h5端的jsBridge的api
+     * todo: 1）添加钩子函数
      */
     const H5SideApi = function () {
       // h5-side注册的方法
@@ -97,7 +98,66 @@
 
       let errorHandle; // 临时消费队列
 
-      let consumeQueue = []; // 监听
+      let consumeQueue = []; // 异步等待postMessage重定义成功
+
+      function awaitPostMessage() {
+        let queue = []; // @ts-ignore
+
+        let isReactNativePostMessageReady = !!window.originalPostMessage;
+
+        let currentPostMessage = message => {
+          // 不需要token
+          message = JSON.parse(message);
+
+          if (message.type === RnSide.types.CHECKSAFETY) {
+            if (queue.length > 0) {
+              queue.shift();
+            }
+
+            queue.push(message);
+          } else {
+            // 需要token
+            consumeQueue.push(message);
+          }
+        };
+
+        const sendQueue = () => {
+          while (queue.length > 0) {
+            sendData(queue.shift());
+          }
+        };
+
+        if (!isReactNativePostMessageReady) {
+          Object.defineProperty(window, 'postMessage', {
+            configurable: true,
+            enumerable: true,
+
+            get() {
+              return currentPostMessage;
+            },
+
+            set(fn) {
+              isReactNativePostMessageReady = true;
+              currentPostMessage = fn;
+              setTimeout(sendQueue, 0);
+            }
+
+          });
+        }
+      }
+      /**
+       * https://github.com/facebook/react-native/issues/11594
+       */
+
+
+      function sendData(data) {
+        if (window) {
+          const params = JSON.stringify(data); // @ts-ignore
+
+          window.postMessage(params);
+        }
+      } // 监听
+
 
       function listenEvent() {
         if (document) {
@@ -234,16 +294,6 @@
         return '';
       }
 
-      function sendData(data) {
-        if (window) {
-          const params = JSON.stringify(data);
-          setTimeout(() => {
-            // @ts-ignore
-            window.postMessage(params);
-          }, 1000);
-        }
-      }
-
       function caniuse(method) {
         return RnApiMap.indexOf(method) !== -1;
       } // 是否验证成功
@@ -283,6 +333,7 @@
             data.callbackId = registerKey;
           }
 
+          awaitPostMessage();
           sendData(data);
         },
 
@@ -568,7 +619,12 @@
             case RnSide.types.ERROR:
               break;
           }
-        }
+        },
+
+        /**
+         * 性能数据
+         **/
+        performance() {}
 
       };
     }();
@@ -577,7 +633,7 @@
      * @file ird-JSBridge的api入口
      */
     var index = {
-      version: '1.0.7',
+      version: '1.0.8',
 
       switchMode(options) {
         const {

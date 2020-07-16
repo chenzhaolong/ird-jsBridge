@@ -23,4 +23,8 @@ export declare const RnSideApi: {
      * @param params 参数
      */
     listenH5(params: object): void;
+    /**
+     * 性能数据
+     **/
+    performance(): void;
 };

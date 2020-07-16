@@ -1,5 +1,6 @@
 /**
  * @file h5端的jsBridge的api
+ * todo: 1）添加钩子函数
  */
 import { H5Side } from '../interface/h5Side';
 import { RnSide } from '../interface/rnSide';
@@ -21,6 +22,55 @@ export const H5SideApi = (function () {
     let errorHandle;
     // 临时消费队列
     let consumeQueue = [];
+    // 异步等待postMessage重定义成功
+    function awaitPostMessage() {
+        let queue = [];
+        // @ts-ignore
+        let isReactNativePostMessageReady = !!window.originalPostMessage;
+        let currentPostMessage = (message) => {
+            // 不需要token
+            message = JSON.parse(message);
+            if (message.type === RnSide.types.CHECKSAFETY) {
+                if (queue.length > 0) {
+                    queue.shift();
+                }
+                queue.push(message);
+            }
+            else {
+                // 需要token
+                consumeQueue.push(message);
+            }
+        };
+        const sendQueue = () => {
+            while (queue.length > 0) {
+                sendData(queue.shift());
+            }
+        };
+        if (!isReactNativePostMessageReady) {
+            Object.defineProperty(window, 'postMessage', {
+                configurable: true,
+                enumerable: true,
+                get() {
+                    return currentPostMessage;
+                },
+                set(fn) {
+                    isReactNativePostMessageReady = true;
+                    currentPostMessage = fn;
+                    setTimeout(sendQueue, 0);
+                }
+            });
+        }
+    }
+    /**
+     * https://github.com/facebook/react-native/issues/11594
+     */
+    function sendData(data) {
+        if (window) {
+            const params = JSON.stringify(data);
+            // @ts-ignore
+            window.postMessage(params);
+        }
+    }
     // 监听
     function listenEvent() {
         if (document) {
@@ -120,15 +170,6 @@ export const H5SideApi = (function () {
         }
         return '';
     }
-    function sendData(data) {
-        if (window) {
-            const params = JSON.stringify(data);
-            setTimeout(() => {
-                // @ts-ignore
-                window.postMessage(params);
-            }, 1000);
-        }
-    }
     function caniuse(method) {
         return RnApiMap.indexOf(method) !== -1;
     }
@@ -164,6 +205,7 @@ export const H5SideApi = (function () {
             if (registerKey) {
                 data.callbackId = registerKey;
             }
+            awaitPostMessage();
             sendData(data);
         },
         /**
