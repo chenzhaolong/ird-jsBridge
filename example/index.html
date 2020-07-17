@@ -25,6 +25,7 @@
       // });
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
+          RnBridge.sendPerformance();
           // RnBridge.setTitle('设置');
       });
       RnBridge.invokeRN({

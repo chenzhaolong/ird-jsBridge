@@ -28,4 +28,8 @@ export declare const H5SideApi: {
      * 扩展h5-side的jsb的方法
      */
     extends(method: string, cb: (params: any) => any): void;
+    /**
+     * 发送H5的性能参数
+     */
+    sendPerformance(): void;
 };

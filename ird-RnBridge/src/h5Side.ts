@@ -4,7 +4,8 @@
  */
 import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
-import { isBoolean, isFunction, getUID1 } from '../utils/index';
+import {getUID1, isBoolean, isFunction} from '../utils/index';
+import {getPerformance} from '../utils/performance';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -31,6 +32,9 @@ export const H5SideApi = (function() {
     // 临时消费队列
     let consumeQueue: Array<any> = [];
 
+    // 桥梁建立时间
+    let bridgeTime: H5Side.BridgeTime = {startTime: 0, endTime: 0};
+
     // 异步等待postMessage重定义成功
     function awaitPostMessage () {
         let queue: Array<any> = [];
@@ -46,7 +50,7 @@ export const H5SideApi = (function() {
                 }
                 queue.push(message);
             } else {
-                // 需要token
+                // 需要token，兜底用，正常不会走到这里
                 consumeQueue.push(message);
             }
         };
@@ -122,6 +126,7 @@ export const H5SideApi = (function() {
     // 验证成功后初始化内部属性
     function initInnerPropertyAfterSuccess(response: any, callbackId: string) {
         if (isBoolean(response.isSafe)) {
+            bridgeTime.endTime = Date.now(); // 只有建立桥梁才有结束时间
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
             invokeCallback(callbackId, {isSuccess: true, params: ''});
@@ -214,6 +219,7 @@ export const H5SideApi = (function() {
          * @param params src-side传过来的校验参数
          */
         checkSafety(params: object, success: () => {}) {
+            bridgeTime.startTime = Date.now();
             listenEvent();
             const registerKey = registerCb(success, '');
             const data: any = {
@@ -269,6 +275,23 @@ export const H5SideApi = (function() {
             if (!window.RnBridge[method]) {
                 // @ts-ignore
                 window.RnBridge[method] = cb
+            }
+        },
+
+        /**
+         * 发送H5的性能参数
+         */
+        sendPerformance () {
+            const performance = getPerformance(bridgeTime);
+            let json = {
+                type: RnSide.types.RAPI,
+                response: {params: performance, token: tokenFromRn},
+                method: 'performanceCb'
+            };
+            if (isCheckSuccess()) {
+                sendData(json);
+            } else {
+                consumeQueue.push(json);
             }
         }
     }

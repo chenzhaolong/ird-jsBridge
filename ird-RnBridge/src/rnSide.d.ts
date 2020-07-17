@@ -24,7 +24,8 @@ export declare const RnSideApi: {
      */
     listenH5(params: object): void;
     /**
-     * 性能数据
+     * 监听H5的性能数据
+     * @param cb 回调函数
      **/
-    performance(): void;
+    listenPerformance(cb: (data: object) => void): void;
 };

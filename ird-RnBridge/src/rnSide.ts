@@ -33,7 +33,7 @@ export const RnSideApi = (function () {
     }
 
     // 注册h5的回调函数
-    function registerCb (success: (data: any) => {}, fail: any) {
+    function registerCb (success: (data: any) => void, fail: any) {
         if (success && typeof success === 'function') {
             // 超出极限，从零开始
             if (rnCbId >= Number.MAX_SAFE_INTEGER) {
@@ -186,10 +186,13 @@ export const RnSideApi = (function () {
         },
 
         /**
-         * 性能数据
+         * 监听H5的性能数据
+         * @param cb 回调函数
          **/ 
-        performance() {
-
+        listenPerformance(cb: (data: object) => void) {
+            if (!RnApiMap['performanceCb'] && isFunction(cb)) {
+                RnApiMap['performanceCb'] = cb;
+            }
         }
     }
 })();

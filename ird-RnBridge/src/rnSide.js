@@ -3,7 +3,7 @@
  */
 import { RnSide } from '../interface/rnSide';
 import { H5Side } from "../interface/h5Side";
-import { isBoolean, getUID, getUID1 } from "../utils/index";
+import { isBoolean, isFunction, getUID, getUID1 } from "../utils/index";
 export const RnSideApi = (function () {
     // webview对象
     let webview;
@@ -174,9 +174,13 @@ export const RnSideApi = (function () {
             }
         },
         /**
-         * 性能数据
+         * 监听H5的性能数据
+         * @param cb 回调函数
          **/
-        performance() {
+        listenPerformance(cb) {
+            if (!RnApiMap['performanceCb'] && isFunction(cb)) {
+                RnApiMap['performanceCb'] = cb;
+            }
         }
     };
 })();

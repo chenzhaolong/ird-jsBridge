@@ -16,7 +16,8 @@
         types["SAFETY"] = "safety";
         types["ERROR"] = "error";
         types["HCB"] = "hcb";
-        types["HAPI"] = "hapi"; // 执行H5的api
+        types["HAPI"] = "hapi";
+        types["PERFORMANCE"] = "performance"; // 性能参数
       })(types = H5Side.types || (H5Side.types = {}));
     })(H5Side || (H5Side = {}));
 
@@ -78,6 +79,50 @@
       });
     }
 
+    function getPerformance(bridgeTime) {
+      const {
+        timing
+      } = window.performance;
+      return {
+        DNS: {
+          desc: 'DNS查询耗时',
+          consuming: timing.domainLookupEnd - timing.domainLookupStart
+        },
+        TCP: {
+          desc: 'TCP链接耗时',
+          consuming: timing.connectEnd - timing.connectStart
+        },
+        REQUEST: {
+          desc: '请求耗时',
+          consuming: timing.responseEnd - timing.responseStart
+        },
+        DOM: {
+          desc: '解析dom树耗时',
+          consuming: timing.domComplete - timing.domInteractive
+        },
+        WHITE_SCREEN: {
+          desc: '白屏时间',
+          consuming: timing.domLoading - timing.navigationStart
+        },
+        DOM_READY: {
+          desc: 'dom ready时间',
+          consuming: timing.domContentLoadedEventEnd - timing.navigationStart
+        },
+        ONLOAD: {
+          desc: 'onload时间',
+          consuming: timing.loadEventEnd - timing.navigationStart
+        },
+        FIRST_SCREEN_FINISHED: {
+          desc: '首屏完成的时间',
+          consuming: timing.domContentLoadedEventStart - timing.navigationStart
+        },
+        BUILD_BRIDGE_TIME: {
+          desc: 'bridge通信成功的耗时',
+          consuming: bridgeTime.endTime - bridgeTime.startTime
+        }
+      };
+    }
+
     /**
      * @file h5端的jsBridge的api
      * todo: 1）添加钩子函数
@@ -98,7 +143,12 @@
 
       let errorHandle; // 临时消费队列
 
-      let consumeQueue = []; // 异步等待postMessage重定义成功
+      let consumeQueue = []; // 桥梁建立时间
+
+      let bridgeTime = {
+        startTime: 0,
+        endTime: 0
+      }; // 异步等待postMessage重定义成功
 
       function awaitPostMessage() {
         let queue = []; // @ts-ignore
@@ -106,8 +156,7 @@
         let isReactNativePostMessageReady = !!window.originalPostMessage;
 
         let currentPostMessage = message => {
-          // 不需要token
-          message = JSON.parse(message);
+          message = JSON.parse(message); // 不需要token
 
           if (message.type === RnSide.types.CHECKSAFETY) {
             if (queue.length > 0) {
@@ -116,7 +165,7 @@
 
             queue.push(message);
           } else {
-            // 需要token
+            // 需要token，兜底用，正常不会走到这里
             consumeQueue.push(message);
           }
         };
@@ -212,6 +261,8 @@
 
       function initInnerPropertyAfterSuccess(response, callbackId) {
         if (isBoolean(response.isSafe)) {
+          bridgeTime.endTime = Date.now(); // 只有建立桥梁才有结束时间
+
           RnApiMap = response.RnApiMapKeys;
           tokenFromRn = response.token;
           invokeCallback(callbackId, {
@@ -322,6 +373,7 @@
          * @param params src-side传过来的校验参数
          */
         checkSafety(params, success) {
+          bridgeTime.startTime = Date.now();
           listenEvent();
           const registerKey = registerCb(success, '');
           const data = {
@@ -389,6 +441,27 @@
           if (!window.RnBridge[method]) {
             // @ts-ignore
             window.RnBridge[method] = cb;
+          }
+        },
+
+        /**
+         * 发送H5的性能参数
+         */
+        sendPerformance() {
+          const performance = getPerformance(bridgeTime);
+          let json = {
+            type: RnSide.types.RAPI,
+            response: {
+              params: performance,
+              token: tokenFromRn
+            },
+            method: 'performanceCb'
+          };
+
+          if (isCheckSuccess()) {
+            sendData(json);
+          } else {
+            consumeQueue.push(json);
           }
         }
 
@@ -622,9 +695,14 @@
         },
 
         /**
-         * 性能数据
+         * 监听H5的性能数据
+         * @param cb 回调函数
          **/
-        performance() {}
+        listenPerformance(cb) {
+          if (!RnApiMap['performanceCb'] && isFunction(cb)) {
+            RnApiMap['performanceCb'] = cb;
+          }
+        }
 
       };
     }();

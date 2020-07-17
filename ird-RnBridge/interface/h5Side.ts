@@ -14,13 +14,14 @@ export namespace H5Side {
         SAFETY = 'safety', // 校验安全性
         ERROR = 'error', // 错误
         HCB = 'hcb', // 执行H5的cb
-        HAPI = 'hapi' // 执行H5的api
+        HAPI = 'hapi', // 执行H5的api
+        PERFORMANCE = 'performance' // 性能参数
     }
 
     export interface H5ReceiveParams {
         type: types,
         callbackId?: string,
-        response: any,
+        response?: any,
         method?: string
     }
 
@@ -30,4 +31,6 @@ export namespace H5Side {
         success: (data: any) => any,
         fail: (error: any) => any
     }
+
+    export interface BridgeTime {startTime: number, endTime: number}
 }
