@@ -79,7 +79,7 @@
       });
     }
 
-    function getPerformance(bridgeTime) {
+    function getPerformance() {
       const {
         timing
       } = window.performance;
@@ -115,10 +115,6 @@
         FIRST_SCREEN_FINISHED: {
           desc: '首屏完成的时间',
           consuming: timing.domContentLoadedEventStart - timing.navigationStart
-        },
-        BUILD_BRIDGE_TIME: {
-          desc: 'bridge通信成功的耗时',
-          consuming: bridgeTime.endTime - bridgeTime.startTime
         }
       };
     }
@@ -148,7 +144,8 @@
       let bridgeTime = {
         startTime: 0,
         endTime: 0
-      }; // 异步等待postMessage重定义成功
+      };
+      let RnApiWhiteList = ['performanceCb']; // 异步等待postMessage重定义成功
 
       function awaitPostMessage() {
         let queue = []; // @ts-ignore
@@ -274,7 +271,8 @@
             consumeQueue.forEach(json => {
               // @ts-ignore
               if (caniuse(json.method)) {
-                // @ts-ignore
+                specialRnApiHandle(json); // @ts-ignore
+
                 json.response.token = tokenFromRn;
                 sendData(json);
               }
@@ -283,6 +281,12 @@
           }
         } else if (consumeQueue.length > 0) {
           consumeQueue = [];
+        }
+      }
+
+      function specialRnApiHandle(json) {
+        if (json.method === 'performanceCb') {
+          json.response.params.BUILD_BRIDGE_TIME.consuming = bridgeTime.endTime - bridgeTime.startTime;
         }
       } // 调用H5Callback回调
 
@@ -346,6 +350,10 @@
       }
 
       function caniuse(method) {
+        if (RnApiWhiteList.indexOf(method) !== -1) {
+          return true;
+        }
+
         return RnApiMap.indexOf(method) !== -1;
       } // 是否验证成功
 
@@ -448,7 +456,15 @@
          * 发送H5的性能参数
          */
         sendPerformance() {
-          const performance = getPerformance(bridgeTime);
+          const {
+            startTime,
+            endTime
+          } = bridgeTime;
+          const performance = getPerformance();
+          performance['BUILD_BRIDGE_TIME'] = {
+            desc: 'bridge通信成功的耗时',
+            consuming: isCheckSuccess() ? endTime - startTime : 0
+          };
           let json = {
             type: RnSide.types.RAPI,
             response: {

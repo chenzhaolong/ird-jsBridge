@@ -25,6 +25,7 @@ export const H5SideApi = (function () {
     let consumeQueue = [];
     // 桥梁建立时间
     let bridgeTime = { startTime: 0, endTime: 0 };
+    let RnApiWhiteList = ['performanceCb'];
     // 异步等待postMessage重定义成功
     function awaitPostMessage() {
         let queue = [];
@@ -120,6 +121,7 @@ export const H5SideApi = (function () {
                 consumeQueue.forEach((json) => {
                     // @ts-ignore
                     if (caniuse(json.method)) {
+                        specialRnApiHandle(json);
                         // @ts-ignore
                         json.response.token = tokenFromRn;
                         sendData(json);
@@ -130,6 +132,11 @@ export const H5SideApi = (function () {
         }
         else if (consumeQueue.length > 0) {
             consumeQueue = [];
+        }
+    }
+    function specialRnApiHandle(json) {
+        if (json.method === 'performanceCb') {
+            json.response.params.BUILD_BRIDGE_TIME.consuming = bridgeTime.endTime - bridgeTime.startTime;
         }
     }
     // 调用H5Callback回调
@@ -175,6 +182,9 @@ export const H5SideApi = (function () {
         return '';
     }
     function caniuse(method) {
+        if (RnApiWhiteList.indexOf(method) !== -1) {
+            return true;
+        }
         return RnApiMap.indexOf(method) !== -1;
     }
     // 是否验证成功
@@ -260,7 +270,12 @@ export const H5SideApi = (function () {
          * 发送H5的性能参数
          */
         sendPerformance() {
-            const performance = getPerformance(bridgeTime);
+            const { startTime, endTime } = bridgeTime;
+            const performance = getPerformance();
+            performance['BUILD_BRIDGE_TIME'] = {
+                desc: 'bridge通信成功的耗时',
+                consuming: isCheckSuccess() ? endTime - startTime : 0
+            };
             let json = {
                 type: RnSide.types.RAPI,
                 response: { params: performance, token: tokenFromRn },

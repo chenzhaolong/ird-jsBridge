@@ -25,7 +25,6 @@
       // });
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
-          RnBridge.sendPerformance();
           // RnBridge.setTitle('设置');
       });
       RnBridge.invokeRN({
@@ -56,6 +55,7 @@
           alert(JSON.stringify(params));
           send({isSuccess: false, result: {a11: 490}});
       });
+      RnBridge.sendPerformance();
   </script>
 </body>
 </html>
