@@ -329,6 +329,10 @@ export const H5SideApi = (function() {
             }
         },
 
-        HttpType: H5Side.InitiatorType
+        HttpType: H5Side.InitiatorType,
+
+        getStore(keys: Array<string>) {
+
+        }
     }
 })();

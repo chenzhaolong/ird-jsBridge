@@ -203,6 +203,13 @@ export const RnSideApi = (function () {
             if (!RnApiMap['performanceTypeCb'] && isFunction(cb)) {
                 RnApiMap['performanceTypeCb'] = cb;
             }
-        }
-    }
+        },
+
+       /**
+        * 储存数据
+        */
+       store(options: RnSide.StoreOptions) {
+           
+       }
+}
 })();

@@ -26,4 +26,16 @@ export namespace RnSide {
         success: (data: any) => any,
         fail: (error: any) => any
     }
+
+    export enum StoreTypes {
+        ADD = 'add',
+        DEL = 'delete',
+        MOD = 'modify'
+    }
+
+    export interface StoreOptions {
+        data: object,
+        type: StoreOptions,
+        noticeH5: boolean
+    }
 }
