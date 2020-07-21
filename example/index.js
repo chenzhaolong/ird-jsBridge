@@ -24,6 +24,6 @@ const server = http.createServer((req, res) => {
     }
 });
 
-server.listen(9001, '192.168.1.103', () => {
+server.listen(9001, '192.168.1.102', () => {
     console.log('start');
 });

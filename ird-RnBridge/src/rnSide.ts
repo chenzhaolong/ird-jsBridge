@@ -193,6 +193,16 @@ export const RnSideApi = (function () {
             if (!RnApiMap['performanceCb'] && isFunction(cb)) {
                 RnApiMap['performanceCb'] = cb;
             }
+        },
+
+       /**
+        * 监听H5请求资源的性能数据
+        * @param cb 回调函数
+        */
+       listenTypePerformance(cb: (data: object) => void) {
+            if (!RnApiMap['performanceTypeCb'] && isFunction(cb)) {
+                RnApiMap['performanceTypeCb'] = cb;
+            }
         }
     }
 })();

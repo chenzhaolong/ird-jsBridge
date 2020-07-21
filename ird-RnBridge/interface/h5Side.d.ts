@@ -30,4 +30,14 @@ export declare namespace H5Side {
         startTime: number;
         endTime: number;
     }
+    enum InitiatorType {
+        ALL = "all",
+        IMG = "img",
+        LINK = "link",
+        IFRAME = "iframe",
+        SCRIPT = "script",
+        CSS = "css",
+        XHR = "xmlhttprequest",
+        NAV = "navigation"
+    }
 }

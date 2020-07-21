@@ -19,6 +19,19 @@
         types["HAPI"] = "hapi";
         types["PERFORMANCE"] = "performance"; // 性能参数
       })(types = H5Side.types || (H5Side.types = {}));
+
+      let InitiatorType;
+
+      (function (InitiatorType) {
+        InitiatorType["ALL"] = "all";
+        InitiatorType["IMG"] = "img";
+        InitiatorType["LINK"] = "link";
+        InitiatorType["IFRAME"] = "iframe";
+        InitiatorType["SCRIPT"] = "script";
+        InitiatorType["CSS"] = "css";
+        InitiatorType["XHR"] = "xmlhttprequest";
+        InitiatorType["NAV"] = "navigation";
+      })(InitiatorType = H5Side.InitiatorType || (H5Side.InitiatorType = {}));
     })(H5Side || (H5Side = {}));
 
     /**
@@ -79,6 +92,9 @@
       });
     }
 
+    /**
+     * @file 获取h5的性能指数，传递给rn
+     */
     function getPerformance() {
       const {
         timing
@@ -118,6 +134,43 @@
         }
       };
     }
+    function getInitiatorPerformance(type) {
+      const resource = window.performance.getEntries();
+
+      if (type === H5Side.InitiatorType.ALL) {
+        let data = {};
+        resource.forEach(item => {
+          if (data[item.entryType]) {
+            data[item.entryType].push({
+              name: item.name,
+              startTime: item.startTime,
+              duration: item.duration
+            });
+          } else {
+            data[item.entryType] = [];
+            data[item.entryType].push({
+              name: item.name,
+              startTime: item.startTime,
+              duration: item.duration
+            });
+          }
+        });
+        return data;
+      } else {
+        let data = resource.filter(item => {
+          return item.entryType === type;
+        }).map(item1 => {
+          return {
+            name: item1.name,
+            startTime: item1.startTime,
+            duration: item1.duration
+          };
+        });
+        let result = {};
+        result[type] = data;
+        return result;
+      }
+    }
 
     /**
      * @file h5端的jsBridge的api
@@ -145,7 +198,7 @@
         startTime: 0,
         endTime: 0
       };
-      let RnApiWhiteList = ['performanceCb']; // 异步等待postMessage重定义成功
+      let RnApiWhiteList = ['performanceCb', 'performanceTypeCb']; // 异步等待postMessage重定义成功
 
       function awaitPostMessage() {
         let queue = []; // @ts-ignore
@@ -479,8 +532,27 @@
           } else {
             consumeQueue.push(json);
           }
-        }
+        },
 
+        sendPerformanceByType(type = H5Side.InitiatorType.ALL) {
+          const performance = getInitiatorPerformance(type);
+          let json = {
+            type: RnSide.types.RAPI,
+            response: {
+              params: performance,
+              token: tokenFromRn
+            },
+            method: 'performanceTypeCb'
+          };
+
+          if (isCheckSuccess()) {
+            sendData(json);
+          } else {
+            consumeQueue.push(json);
+          }
+        },
+
+        HttpType: H5Side.InitiatorType
       };
     }();
 
@@ -717,6 +789,16 @@
         listenPerformance(cb) {
           if (!RnApiMap['performanceCb'] && isFunction(cb)) {
             RnApiMap['performanceCb'] = cb;
+          }
+        },
+
+        /**
+         * 监听H5请求资源的性能数据
+         * @param cb 回调函数
+         */
+        listenTypePerformance(cb) {
+          if (!RnApiMap['performanceTypeCb'] && isFunction(cb)) {
+            RnApiMap['performanceTypeCb'] = cb;
           }
         }
 

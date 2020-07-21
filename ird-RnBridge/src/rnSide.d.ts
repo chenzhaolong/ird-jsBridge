@@ -28,4 +28,9 @@ export declare const RnSideApi: {
      * @param cb 回调函数
      **/
     listenPerformance(cb: (data: object) => void): void;
+    /**
+     * 监听H5请求资源的性能数据
+     * @param cb 回调函数
+     */
+    listenTypePerformance(cb: (data: object) => void): void;
 };

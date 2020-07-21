@@ -5,7 +5,7 @@
 import { H5Side } from '../interface/h5Side';
 import { RnSide } from '../interface/rnSide';
 import { getUID1, isBoolean, isFunction } from '../utils/index';
-import { getPerformance } from '../utils/performance';
+import { getInitiatorPerformance, getPerformance } from '../utils/performance';
 export const H5SideApi = (function () {
     // h5-side注册的方法
     let h5ApiMap = {};
@@ -25,7 +25,7 @@ export const H5SideApi = (function () {
     let consumeQueue = [];
     // 桥梁建立时间
     let bridgeTime = { startTime: 0, endTime: 0 };
-    let RnApiWhiteList = ['performanceCb'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb'];
     // 异步等待postMessage重定义成功
     function awaitPostMessage() {
         let queue = [];
@@ -287,6 +287,21 @@ export const H5SideApi = (function () {
             else {
                 consumeQueue.push(json);
             }
-        }
+        },
+        sendPerformanceByType(type = H5Side.InitiatorType.ALL) {
+            const performance = getInitiatorPerformance(type);
+            let json = {
+                type: RnSide.types.RAPI,
+                response: { params: performance, token: tokenFromRn },
+                method: 'performanceTypeCb'
+            };
+            if (isCheckSuccess()) {
+                sendData(json);
+            }
+            else {
+                consumeQueue.push(json);
+            }
+        },
+        HttpType: H5Side.InitiatorType
     };
 })();

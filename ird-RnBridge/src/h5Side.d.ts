@@ -32,4 +32,6 @@ export declare const H5SideApi: {
      * 发送H5的性能参数
      */
     sendPerformance(): void;
+    sendPerformanceByType(type?: H5Side.InitiatorType): void;
+    HttpType: typeof H5Side.InitiatorType;
 };
