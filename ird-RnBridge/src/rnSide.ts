@@ -208,8 +208,6 @@ export const RnSideApi = (function () {
        /**
         * 储存数据
         */
-       store(options: RnSide.StoreOptions) {
-           
-       }
+       store(options: RnSide.StoreOptions) {}
 }
 })();
