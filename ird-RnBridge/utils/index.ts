@@ -19,6 +19,14 @@ export function isFunction(fn: any):boolean {
 }
 
 /**
+ * 判断是否为字符串
+ * @param str
+ */
+export function isString(str: any):boolean {
+    return str && typeof str === 'string';
+}
+
+/**
  * 生成唯一值
  */
 export function getUID (): string { // 获取唯一值

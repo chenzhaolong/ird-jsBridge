@@ -34,6 +34,7 @@ export namespace RnSide {
     }
 
     export interface StoreOptions {
+        key: string,
         data: object,
         type: StoreOptions,
         noticeH5: boolean

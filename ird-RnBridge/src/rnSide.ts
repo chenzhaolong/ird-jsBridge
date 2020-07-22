@@ -3,7 +3,8 @@
  */
 import {RnSide} from '../interface/rnSide';
 import {H5Side} from "../interface/h5Side";
-import {isBoolean, isFunction, getUID, getUID1} from "../utils/index";
+import {getUID, getUID1, isBoolean, isFunction, isString} from "../utils/index";
+import {getStoreInstance} from '../utils/store';
 
 export const RnSideApi = (function () {
     // webview对象
@@ -188,7 +189,7 @@ export const RnSideApi = (function () {
         /**
          * 监听H5的性能数据
          * @param cb 回调函数
-         **/ 
+         **/
         listenPerformance(cb: (data: object) => void) {
             if (!RnApiMap['performanceCb'] && isFunction(cb)) {
                 RnApiMap['performanceCb'] = cb;
@@ -208,6 +209,47 @@ export const RnSideApi = (function () {
        /**
         * 储存数据
         */
-       store(options: RnSide.StoreOptions) {}
+       sessionStore(options: RnSide.StoreOptions) {
+           const {key, data, type = '', noticeH5} = options;
+           const store = getStoreInstance();
+           let isStore;
+           switch(type) {
+               case RnSide.StoreTypes.ADD:
+                   isStore = store.add(key, data);
+                   break;
+               case RnSide.StoreTypes.DEL:
+                   isStore = store.del(key, data);
+                   break;
+               case RnSide.StoreTypes.MOD:
+                   isStore = store.modify(key, data);
+                   break;
+               default:
+                   isStore = store.add(key, data);
+                   break;
+           }
+           if (isStore) {
+               if (noticeH5) { // 主动触发H5调用
+
+               } else { // 等待H5调用
+                   if (!RnApiMap['getSessionStore']) {
+                       RnApiMap['getSessionStore'] = function(params: any, send: any) {
+                           params = isString(params) ? [params] : params;
+                           const store = getStoreInstance();
+                           let target: {[key: string]: any} = {};
+                           params.forEach((key: string) => {
+                               target[key] = store.get(key);
+                           });
+                           send({isSuccess: true, result: target});
+                       }
+                   }
+               }
+           } else {
+               console.warn(`${key} can not save into store in RnBridge.`);
+           }
+       },
+
+        clearSessionStore() {
+
+        }
 }
 })();

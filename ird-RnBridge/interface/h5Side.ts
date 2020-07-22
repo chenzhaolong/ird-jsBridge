@@ -29,7 +29,7 @@ export namespace H5Side {
         method: string,
         params: any,
         success: (data: any) => any,
-        fail: (error: any) => any
+        fail?: (error: any) => any
     }
 
     export interface BridgeTime {

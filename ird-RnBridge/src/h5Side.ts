@@ -35,7 +35,7 @@ export const H5SideApi = (function() {
     // 桥梁建立时间
     let bridgeTime: H5Side.BridgeTime = {startTime: 0, endTime: 0};
 
-    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore'];
 
     // 异步等待postMessage重定义成功
     function awaitPostMessage () {
@@ -331,7 +331,18 @@ export const H5SideApi = (function() {
 
         HttpType: H5Side.InitiatorType,
 
-        getStore(keys: Array<string>) {
+        getSessionStore(keys: Array<string>, cb: (data: object) => any) {
+            if (!keys) {
+               throw new Error('key can not be undefined');
+            }
+            this.invokeRN({
+                method: 'getSessionStore',
+                params: keys,
+                success: cb
+            });
+        },
+
+        getSessionStoreAsync() {
 
         }
     }
