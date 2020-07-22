@@ -229,7 +229,10 @@ export const RnSideApi = (function () {
            }
            if (isStore) {
                if (noticeH5) { // 主动触发H5调用
-
+                   tokenToH5 && sendData({
+                       type: H5Side.types.SESSIONSTORE,
+                       params: store.get('all')
+                   })
                } else { // 等待H5调用
                    if (!RnApiMap['getSessionStore']) {
                        RnApiMap['getSessionStore'] = function(params: any, send: any) {
