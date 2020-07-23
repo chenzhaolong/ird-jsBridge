@@ -19,8 +19,8 @@ class Store {
 
     }
 
-    get(key) {
-
+    get(key: string) {
+        return {}
     }
 
     clear() {

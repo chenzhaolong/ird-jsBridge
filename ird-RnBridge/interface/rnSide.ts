@@ -23,8 +23,8 @@ export namespace RnSide {
     export interface InvokeH5Params {
         method: string,
         params: any,
-        success: (data: any) => any,
-        fail: (error: any) => any
+        success?: (data: any) => any,
+        fail?: (error: any) => any
     }
 
     export enum StoreTypes {

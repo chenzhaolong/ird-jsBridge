@@ -15,7 +15,7 @@ export namespace H5Side {
         ERROR = 'error', // 错误
         HCB = 'hcb', // 执行H5的cb
         HAPI = 'hapi', // 执行H5的api
-        SESSIONSTORE = 'sessionStore' // 性能参数
+        // SESSIONSTORE = 'sessionStore'
     }
 
     export interface H5ReceiveParams {

@@ -34,7 +34,7 @@ export const RnSideApi = (function () {
     }
 
     // 注册h5的回调函数
-    function registerCb (success: (data: any) => void, fail: any) {
+    function registerCb (success: any, fail: any) {
         if (success && typeof success === 'function') {
             // 超出极限，从零开始
             if (rnCbId >= Number.MAX_SAFE_INTEGER) {
@@ -228,22 +228,27 @@ export const RnSideApi = (function () {
                    break;
            }
            if (isStore) {
-               if (noticeH5) { // 主动触发H5调用
-                   tokenToH5 && sendData({
-                       type: H5Side.types.SESSIONSTORE,
-                       params: store.get('all')
-                   })
-               } else { // 等待H5调用
-                   if (!RnApiMap['getSessionStore']) {
-                       RnApiMap['getSessionStore'] = function(params: any, send: any) {
-                           params = isString(params) ? [params] : params;
-                           const store = getStoreInstance();
-                           let target: {[key: string]: any} = {};
-                           params.forEach((key: string) => {
-                               target[key] = store.get(key);
-                           });
-                           send({isSuccess: true, result: target});
-                       }
+               // 等待H5调用
+               if (!RnApiMap['getSessionStore']) {
+                   RnApiMap['getSessionStore'] = function(params: any, send: any) {
+                       params = isString(params) ? [params] : params;
+                       const store = getStoreInstance();
+                       let target: {[key: string]: any} = {};
+                       params.forEach((key: string) => {
+                           target[key] = store.get(key);
+                       });
+                       send({isSuccess: true, result: target});
+                   }
+               }
+               // 主动触发H5调用
+               if (noticeH5) {
+                   if (tokenToH5) {
+                       this.invokeH5({
+                           method: 'getSessionStoreH5',
+                           params: data
+                       });
+                   } else {
+                       console.warn('bridge is still not to build, if you must do send, you can set the noticeH5 true.');
                    }
                }
            } else {
