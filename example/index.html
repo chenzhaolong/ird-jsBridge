@@ -6,6 +6,7 @@
 </head>
 <body>
   <div style="width: 100px; height: 200px; color: red" id="demo">nihao12</div>
+  <div id="content"></div>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
@@ -26,6 +27,10 @@
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
           // RnBridge.setTitle('设置');
+          RnBridge.getSessionStore(['sat2'], (data) => {
+              const content = document.getElementById('content');
+              content.innerText = JSON.stringify(data);
+          })
       });
       RnBridge.invokeRN({
           method: 'a1',
@@ -56,7 +61,15 @@
           send({isSuccess: false, result: {a11: 490}});
       });
       RnBridge.sendPerformance();
-      RnBridge.sendPerformanceByType()
+      RnBridge.sendPerformanceByType();
+      RnBridge.getSessionStoreAsync('sat1', (data) => {
+          const content = document.getElementById('content');
+          content.innerText = JSON.stringify(data);
+      });
+      RnBridge.getSessionStoreAsync('sat', (data) => {
+          const content = document.getElementById('content');
+          content.innerText = JSON.stringify(data);
+      })
   </script>
 </body>
 </html>

@@ -20,7 +20,18 @@ export declare namespace RnSide {
     interface InvokeH5Params {
         method: string;
         params: any;
-        success: (data: any) => any;
-        fail: (error: any) => any;
+        success?: (data: any) => any;
+        fail?: (error: any) => any;
+    }
+    enum StoreTypes {
+        ADD = "add",
+        DEL = "delete",
+        MOD = "modify"
+    }
+    interface StoreOptions {
+        key: string;
+        data: object;
+        type: StoreOptions;
+        noticeH5: boolean;
     }
 }

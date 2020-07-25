@@ -16,6 +16,13 @@ export function isFunction(fn) {
     return typeof fn === 'function';
 }
 /**
+ * 判断是否为字符串
+ * @param str
+ */
+export function isString(str) {
+    return str && typeof str === 'string';
+}
+/**
  * 生成唯一值
  */
 export function getUID() {

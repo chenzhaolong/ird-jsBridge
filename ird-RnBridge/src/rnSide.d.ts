@@ -33,4 +33,16 @@ export declare const RnSideApi: {
      * @param cb 回调函数
      */
     listenTypePerformance(cb: (data: object) => void): void;
+    /**
+     * 储存数据
+     */
+    sessionStore(options: RnSide.StoreOptions): void;
+    /**
+     * 清除储存的数据
+     */
+    clearSessionStore(key: string): void;
+    /**
+     * 是否有该储存数据
+     */
+    hasSessionStoreByKey(key: string): boolean;
 };

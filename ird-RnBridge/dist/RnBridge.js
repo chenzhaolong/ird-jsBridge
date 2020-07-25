@@ -16,8 +16,7 @@
         types["SAFETY"] = "safety";
         types["ERROR"] = "error";
         types["HCB"] = "hcb";
-        types["HAPI"] = "hapi";
-        types["PERFORMANCE"] = "performance"; // 性能参数
+        types["HAPI"] = "hapi"; // SESSIONSTORE = 'sessionStore'
       })(types = H5Side.types || (H5Side.types = {}));
 
       let InitiatorType;
@@ -48,6 +47,14 @@
         types["RCB"] = "rcb";
         types["RAPI"] = "rapi"; // 执行rn的api
       })(types = RnSide.types || (RnSide.types = {}));
+
+      let StoreTypes;
+
+      (function (StoreTypes) {
+        StoreTypes["ADD"] = "add";
+        StoreTypes["DEL"] = "delete";
+        StoreTypes["MOD"] = "modify";
+      })(StoreTypes = RnSide.StoreTypes || (RnSide.StoreTypes = {}));
     })(RnSide || (RnSide = {}));
 
     /**
@@ -68,6 +75,14 @@
 
     function isFunction(fn) {
       return typeof fn === 'function';
+    }
+    /**
+     * 判断是否为字符串
+     * @param str
+     */
+
+    function isString(str) {
+      return str && typeof str === 'string';
     }
     /**
      * 生成唯一值
@@ -176,6 +191,7 @@
      * @file h5端的jsBridge的api
      * todo: 1）添加钩子函数
      */
+
     const H5SideApi = function () {
       // h5-side注册的方法
       let h5ApiMap = {}; // h5-side注册的回调
@@ -198,7 +214,7 @@
         startTime: 0,
         endTime: 0
       };
-      let RnApiWhiteList = ['performanceCb', 'performanceTypeCb']; // 异步等待postMessage重定义成功
+      let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore']; // 异步等待postMessage重定义成功
 
       function awaitPostMessage() {
         let queue = []; // @ts-ignore
@@ -303,8 +319,26 @@
                 }
 
                 break;
+              // case H5Side.types.SESSIONSTORE:
+              //     // @ts-ignore
+              //     const event = new CustomEvent('sessionStore');
+              //     event.initEvent();
+              //     event.dispatchEvent();
+              //     break;
             }
-          });
+          }); // // @ts-ignore
+          // document.addEventListener('sessionStore', (event: {data: string}) => {
+          //     let parseData;
+          //     try {
+          //         parseData = JSON.parse(event.data);
+          //     } catch(e) {
+          //         parseData = {};
+          //     }
+          //
+          //     if (h5ApiMap['getSessionStoreH5']) {
+          //         h5ApiMap['getSessionStoreH5'](parseData)
+          //     }
+          // })
         }
       } // 验证成功后初始化内部属性
 
@@ -534,6 +568,9 @@
           }
         },
 
+        /**
+         * 发送各种资源性能参数
+         */
         sendPerformanceByType(type = H5Side.InitiatorType.ALL) {
           const performance = getInitiatorPerformance(type);
           let json = {
@@ -552,7 +589,98 @@
           }
         },
 
-        HttpType: H5Side.InitiatorType
+        HttpType: H5Side.InitiatorType,
+
+        getSessionStore(keys, cb) {
+          if (!keys) {
+            throw new Error('key can not be undefined');
+          }
+
+          this.invokeRN({
+            method: 'getSessionStore',
+            params: keys,
+            success: cb
+          });
+        },
+
+        getSessionStoreAsync(key, cb) {
+          let apiName = `getSessionStoreH5-${key}`;
+
+          if (!h5ApiMap[apiName]) {
+            h5ApiMap[apiName] = cb;
+          }
+        }
+
+      };
+    }();
+
+    /**
+     * @file webview储存数据
+     */
+    class Store {
+      constructor() {
+        this.cache = {};
+      }
+
+      add(key, data) {
+        if (this.cache[key]) {
+          console.warn(`the key ${key} is exist in the store, please change the type when use sessionStore.`);
+          return false;
+        }
+
+        this.cache[key] = data;
+        return true;
+      }
+
+      del(key) {
+        if (this.cache[key]) {
+          this.cache[key] = null;
+          return delete this.cache[key];
+        }
+
+        console.warn(`the key ${key} has been delete yet.`);
+        return true;
+      }
+
+      modify(key, data) {
+        if (this.cache[key]) {
+          this.cache[key] = data;
+          return true;
+        }
+
+        console.warn(`the key ${key} has not existed in the store, so can not modify.`);
+        return false;
+      }
+
+      get(key) {
+        if (Object.keys(this.cache).indexOf(key) === -1) {
+          return '';
+        }
+
+        return this.cache[key];
+      }
+
+      clear(key) {
+        if (!key) {
+          this.cache = {};
+        } else if (Object.keys(this.cache).indexOf(key) !== -1) {
+          this.cache[key] = {};
+        } else {
+          console.warn(`the key ${key} has not exist in the store`);
+        }
+      }
+
+    }
+
+    const getStoreInstance = function () {
+      let instance = null;
+      return function () {
+        if (instance) {
+          return instance;
+        } else {
+          instance = new Store();
+          return instance;
+        }
       };
     }();
 
@@ -800,6 +928,92 @@
           if (!RnApiMap['performanceTypeCb'] && isFunction(cb)) {
             RnApiMap['performanceTypeCb'] = cb;
           }
+        },
+
+        /**
+         * 储存数据
+         */
+        sessionStore(options) {
+          const {
+            key,
+            data,
+            type = '',
+            noticeH5
+          } = options;
+
+          if (!isString(key)) {
+            console.warn('the value of key must be exist');
+            return;
+          }
+
+          const store = getStoreInstance();
+          let isStore;
+
+          switch (type) {
+            case RnSide.StoreTypes.ADD:
+              isStore = store.add(key, data);
+              break;
+
+            case RnSide.StoreTypes.DEL:
+              isStore = store.del(key, data);
+              break;
+
+            case RnSide.StoreTypes.MOD:
+              isStore = store.modify(key, data);
+              break;
+
+            default:
+              isStore = store.add(key, data);
+              break;
+          }
+
+          if (isStore) {
+            // 等待H5调用
+            if (!RnApiMap['getSessionStore']) {
+              RnApiMap['getSessionStore'] = function (params, send) {
+                params = isString(params) ? [params] : params;
+                const store = getStoreInstance();
+                let target = {};
+                params.forEach(key => {
+                  target[key] = store.get(key);
+                });
+                send({
+                  isSuccess: true,
+                  result: target
+                });
+              };
+            } // 主动触发H5调用
+
+
+            if (noticeH5) {
+              if (tokenToH5) {
+                this.invokeH5({
+                  method: `getSessionStoreH5-${key}`,
+                  params: data
+                });
+              } else {
+                console.warn('bridge is still not to build, if you must do send, you can set the noticeH5 true.');
+              }
+            }
+          } else {
+            console.warn(`${key} in RnBridge has problem, maybe check the type of options.`);
+          }
+        },
+
+        /**
+         * 清除储存的数据
+         */
+        clearSessionStore(key) {
+          const store = getStoreInstance();
+          store.clear(key);
+        },
+
+        /**
+         * 是否有该储存数据
+         */
+        hasSessionStoreByKey(key) {
+          const store = getStoreInstance();
+          return store.get(key) && true;
         }
 
       };

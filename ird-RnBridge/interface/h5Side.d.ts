@@ -11,8 +11,7 @@ export declare namespace H5Side {
         SAFETY = "safety",
         ERROR = "error",
         HCB = "hcb",
-        HAPI = "hapi",
-        PERFORMANCE = "performance"
+        HAPI = "hapi"
     }
     interface H5ReceiveParams {
         type: types;
@@ -24,7 +23,7 @@ export declare namespace H5Side {
         method: string;
         params: any;
         success: (data: any) => any;
-        fail: (error: any) => any;
+        fail?: (error: any) => any;
     }
     interface BridgeTime {
         startTime: number;

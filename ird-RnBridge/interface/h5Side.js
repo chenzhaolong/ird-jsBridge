@@ -9,7 +9,7 @@ export var H5Side;
         types["ERROR"] = "error";
         types["HCB"] = "hcb";
         types["HAPI"] = "hapi";
-        types["PERFORMANCE"] = "performance"; // 性能参数
+        // SESSIONSTORE = 'sessionStore'
     })(types = H5Side.types || (H5Side.types = {}));
     let InitiatorType;
     (function (InitiatorType) {

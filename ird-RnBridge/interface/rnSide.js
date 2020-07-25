@@ -10,4 +10,10 @@ export var RnSide;
         types["RCB"] = "rcb";
         types["RAPI"] = "rapi"; // 执行rn的api
     })(types = RnSide.types || (RnSide.types = {}));
+    let StoreTypes;
+    (function (StoreTypes) {
+        StoreTypes["ADD"] = "add";
+        StoreTypes["DEL"] = "delete";
+        StoreTypes["MOD"] = "modify";
+    })(StoreTypes = RnSide.StoreTypes || (RnSide.StoreTypes = {}));
 })(RnSide || (RnSide = {}));

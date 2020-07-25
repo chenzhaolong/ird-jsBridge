@@ -12,6 +12,11 @@ export declare function isBoolean(params: any): boolean;
  */
 export declare function isFunction(fn: any): boolean;
 /**
+ * 判断是否为字符串
+ * @param str
+ */
+export declare function isString(str: any): boolean;
+/**
  * 生成唯一值
  */
 export declare function getUID(): string;

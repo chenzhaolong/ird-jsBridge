@@ -6,7 +6,6 @@ import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
 import {getUID1, isBoolean, isFunction} from '../utils/index';
 import {getInitiatorPerformance, getPerformance} from '../utils/performance';
-// import {CustomEvent} from '../utils/customEvent';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -121,27 +120,8 @@ export const H5SideApi = (function() {
                             errorHandle(response);
                         }
                         break;
-                    // case H5Side.types.SESSIONSTORE:
-                    //     // @ts-ignore
-                    //     const event = new CustomEvent('sessionStore');
-                    //     event.initEvent();
-                    //     event.dispatchEvent();
-                    //     break;
                 }
             });
-            // // @ts-ignore
-            // document.addEventListener('sessionStore', (event: {data: string}) => {
-            //     let parseData;
-            //     try {
-            //         parseData = JSON.parse(event.data);
-            //     } catch(e) {
-            //         parseData = {};
-            //     }
-            //
-            //     if (h5ApiMap['getSessionStoreH5']) {
-            //         h5ApiMap['getSessionStoreH5'](parseData)
-            //     }
-            // })
         }
     }
 
@@ -362,9 +342,10 @@ export const H5SideApi = (function() {
             });
         },
 
-        getSessionStoreAsync(cb: (data: object) => any) {
-            if (!h5ApiMap['getSessionStoreH5']) {
-                h5ApiMap['getSessionStoreH5'] = cb;
+        getSessionStoreAsync(key: string, cb: (data: object) => any) {
+            let apiName = `getSessionStoreH5-${key}`;
+            if (!h5ApiMap[apiName]) {
+                h5ApiMap[apiName] = cb;
             }
         }
     }

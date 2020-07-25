@@ -211,6 +211,10 @@ export const RnSideApi = (function () {
         */
        sessionStore(options: RnSide.StoreOptions) {
            const {key, data, type = '', noticeH5} = options;
+           if (!isString(key)) {
+               console.warn('the value of key must be exist');
+               return
+           }
            const store = getStoreInstance();
            let isStore;
            switch(type) {
@@ -244,7 +248,7 @@ export const RnSideApi = (function () {
                if (noticeH5) {
                    if (tokenToH5) {
                        this.invokeH5({
-                           method: 'getSessionStoreH5',
+                           method: `getSessionStoreH5-${key}`,
                            params: data
                        });
                    } else {
@@ -252,12 +256,24 @@ export const RnSideApi = (function () {
                    }
                }
            } else {
-               console.warn(`${key} can not save into store in RnBridge.`);
+               console.warn(`${key} in RnBridge has problem, maybe check the type of options.`);
            }
        },
 
-        clearSessionStore() {
+        /**
+         * 清除储存的数据
+         */
+       clearSessionStore(key: string) {
+           const store = getStoreInstance();
+           store.clear(key);
+       },
 
-        }
+        /**
+         * 是否有该储存数据
+         */
+       hasSessionStoreByKey(key: string) {
+           const store = getStoreInstance();
+           return store.get(key) && true;
+       }
 }
 })();

@@ -6,6 +6,7 @@ import { H5Side } from '../interface/h5Side';
 import { RnSide } from '../interface/rnSide';
 import { getUID1, isBoolean, isFunction } from '../utils/index';
 import { getInitiatorPerformance, getPerformance } from '../utils/performance';
+// import {CustomEvent} from '../utils/customEvent';
 export const H5SideApi = (function () {
     // h5-side注册的方法
     let h5ApiMap = {};
@@ -25,7 +26,7 @@ export const H5SideApi = (function () {
     let consumeQueue = [];
     // 桥梁建立时间
     let bridgeTime = { startTime: 0, endTime: 0 };
-    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore'];
     // 异步等待postMessage重定义成功
     function awaitPostMessage() {
         let queue = [];
@@ -106,8 +107,27 @@ export const H5SideApi = (function () {
                             errorHandle(response);
                         }
                         break;
+                    // case H5Side.types.SESSIONSTORE:
+                    //     // @ts-ignore
+                    //     const event = new CustomEvent('sessionStore');
+                    //     event.initEvent();
+                    //     event.dispatchEvent();
+                    //     break;
                 }
             });
+            // // @ts-ignore
+            // document.addEventListener('sessionStore', (event: {data: string}) => {
+            //     let parseData;
+            //     try {
+            //         parseData = JSON.parse(event.data);
+            //     } catch(e) {
+            //         parseData = {};
+            //     }
+            //
+            //     if (h5ApiMap['getSessionStoreH5']) {
+            //         h5ApiMap['getSessionStoreH5'](parseData)
+            //     }
+            // })
         }
     }
     // 验证成功后初始化内部属性
@@ -288,6 +308,9 @@ export const H5SideApi = (function () {
                 consumeQueue.push(json);
             }
         },
+        /**
+         * 发送各种资源性能参数
+         */
         sendPerformanceByType(type = H5Side.InitiatorType.ALL) {
             const performance = getInitiatorPerformance(type);
             let json = {
@@ -302,6 +325,22 @@ export const H5SideApi = (function () {
                 consumeQueue.push(json);
             }
         },
-        HttpType: H5Side.InitiatorType
+        HttpType: H5Side.InitiatorType,
+        getSessionStore(keys, cb) {
+            if (!keys) {
+                throw new Error('key can not be undefined');
+            }
+            this.invokeRN({
+                method: 'getSessionStore',
+                params: keys,
+                success: cb
+            });
+        },
+        getSessionStoreAsync(key, cb) {
+            let apiName = `getSessionStoreH5-${key}`;
+            if (!h5ApiMap[apiName]) {
+                h5ApiMap[apiName] = cb;
+            }
+        }
     };
 })();
