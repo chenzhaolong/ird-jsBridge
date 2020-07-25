@@ -222,7 +222,7 @@ export const RnSideApi = (function () {
                    isStore = store.add(key, data);
                    break;
                case RnSide.StoreTypes.DEL:
-                   isStore = store.del(key, data);
+                   isStore = store.del(key);
                    break;
                case RnSide.StoreTypes.MOD:
                    isStore = store.modify(key, data);
