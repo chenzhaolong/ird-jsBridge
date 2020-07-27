@@ -280,7 +280,7 @@ export const RnSideApi = (function () {
          * 监听h5发布的ajax请求
          */
         listenAjax() {
-            
+
        }
     }
 })();
