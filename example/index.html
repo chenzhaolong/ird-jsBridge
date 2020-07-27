@@ -62,14 +62,22 @@
       });
       RnBridge.sendPerformance();
       RnBridge.sendPerformanceByType();
+      RnBridge.getSessionStore(['sat2', 'tue'], (data) => {
+          const content = document.getElementById('content');
+          if (content) {
+              content.innerText = JSON.stringify(data);
+          } else {
+              content.innerText = 'empty';
+          }
+      });
       RnBridge.getSessionStoreAsync('sat1', (data) => {
           const content = document.getElementById('content');
-          content.innerText = JSON.stringify(data);
+          content.innerText = JSON.stringify(data) + 'sat1';
       });
       RnBridge.getSessionStoreAsync('sat', (data) => {
           const content = document.getElementById('content');
-          content.innerText = JSON.stringify(data);
-      })
+          content.innerText = JSON.stringify(data) + 'sat';
+      });
   </script>
 </body>
 </html>

@@ -6,6 +6,7 @@ import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
 import {getUID1, isBoolean, isFunction} from '../utils/index';
 import {getInitiatorPerformance, getPerformance} from '../utils/performance';
+import {debugAjax} from '../utils/debug';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -329,8 +330,14 @@ export const H5SideApi = (function() {
             }
         },
 
+        /**
+         * 资源枚举
+         */
         HttpType: H5Side.InitiatorType,
 
+        /**
+         * 获取制定的store
+         */
         getSessionStore(keys: Array<string>, cb: (data: object) => any) {
             if (!keys) {
                throw new Error('key can not be undefined');
@@ -342,10 +349,26 @@ export const H5SideApi = (function() {
             });
         },
 
+        /**
+         * 异步获取store
+         */
         getSessionStoreAsync(key: string, cb: (data: object) => any) {
             let apiName = `getSessionStoreH5-${key}`;
             if (!h5ApiMap[apiName]) {
                 h5ApiMap[apiName] = cb;
+            }
+        },
+
+        /**
+         * 开启调试功能
+         */
+        debug(type: H5Side.Debug) {
+            switch(type) {
+                case H5Side.Debug.AJAX:
+                    debugAjax();
+                    break;
+                default:
+                    break;
             }
         }
     }

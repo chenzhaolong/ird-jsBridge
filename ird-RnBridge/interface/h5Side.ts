@@ -47,4 +47,8 @@ export namespace H5Side {
         XHR = 'xmlhttprequest',
         NAV = 'navigation'
     }
+
+    export enum Debug {
+        AJAX = 'ajax'
+    }
 }

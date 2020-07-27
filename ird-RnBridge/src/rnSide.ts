@@ -274,6 +274,13 @@ export const RnSideApi = (function () {
        hasSessionStoreByKey(key: string) {
            const store = getStoreInstance();
            return store.get(key) && true;
+       },
+
+        /**
+         * 监听h5发布的ajax请求
+         */
+        listenAjax() {
+            
        }
-}
+    }
 })();
