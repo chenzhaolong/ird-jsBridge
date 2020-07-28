@@ -6,7 +6,7 @@ import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
 import {getUID1, isBoolean, isFunction} from '../utils/index';
 import {getInitiatorPerformance, getPerformance} from '../utils/performance';
-import {debugAjax} from '../utils/debug';
+import {debugAjax, listenDebugAjax} from '../utils/debug';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -36,7 +36,7 @@ export const H5SideApi = (function() {
     // 桥梁建立时间
     let bridgeTime: H5Side.BridgeTime = {startTime: 0, endTime: 0};
 
-    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore', 'debugAjax'];
 
     // 异步等待postMessage重定义成功
     function awaitPostMessage () {
@@ -123,6 +123,21 @@ export const H5SideApi = (function() {
                         break;
                 }
             });
+            listenDebugAjax((params) => {
+                const method = 'debugAjax';
+                let json: RnSide.RnParams = {
+                    type: RnSide.types.RAPI,
+                    response: {params, token: tokenFromRn},
+                    method: method
+                };
+                if (isCheckSuccess()) {
+                    if (caniuse(method)) {
+                        sendData(json);
+                    }
+                } else {
+                    consumeQueue.push(json);
+                }
+            })
         }
     }
 
