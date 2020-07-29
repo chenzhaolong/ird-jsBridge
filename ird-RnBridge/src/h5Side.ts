@@ -6,7 +6,7 @@ import {H5Side} from '../interface/h5Side';
 import {RnSide} from '../interface/rnSide';
 import {getUID1, isBoolean, isFunction} from '../utils/index';
 import {getInitiatorPerformance, getPerformance} from '../utils/performance';
-import {debugAjax, listenDebugAjax} from '../utils/debug';
+import {debugAjax, listenDebugAjax, debugConsole, listenDebugConsole} from '../utils/debug';
 
 export const H5SideApi = (function() {
     // h5-side注册的方法
@@ -36,7 +36,7 @@ export const H5SideApi = (function() {
     // 桥梁建立时间
     let bridgeTime: H5Side.BridgeTime = {startTime: 0, endTime: 0};
 
-    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore', 'debugAjax'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore', 'debugAjax', 'debugConsole'];
 
     // 异步等待postMessage重定义成功
     function awaitPostMessage () {
@@ -123,8 +123,10 @@ export const H5SideApi = (function() {
                         break;
                 }
             });
-            listenDebugAjax((params) => {
-                const method = 'debugAjax';
+        }
+
+        if (window) {
+            const _send = (method: string, params: any) => {
                 let json: RnSide.RnParams = {
                     type: RnSide.types.RAPI,
                     response: {params, token: tokenFromRn},
@@ -137,6 +139,16 @@ export const H5SideApi = (function() {
                 } else {
                     consumeQueue.push(json);
                 }
+            };
+
+            listenDebugAjax((params) => {
+                const method = 'debugAjax';
+                _send(method, params);
+            });
+
+            listenDebugConsole((params) => {
+                const method = 'debugConsole';
+                _send(method, params);
             })
         }
     }
@@ -382,6 +394,8 @@ export const H5SideApi = (function() {
                 case H5Side.Debug.AJAX:
                     debugAjax();
                     break;
+                case H5Side.Debug.CONSOLE:
+                    debugConsole();
                 default:
                     break;
             }

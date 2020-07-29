@@ -49,7 +49,8 @@ export namespace H5Side {
     }
 
     export enum Debug {
-        AJAX = 'ajax'
+        AJAX = 'ajax',
+        CONSOLE = 'console'
     }
     
     export enum XHREvent {

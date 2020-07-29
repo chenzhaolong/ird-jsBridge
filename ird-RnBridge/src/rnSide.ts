@@ -279,12 +279,21 @@ export const RnSideApi = (function () {
         /**
          * 监听h5发布的ajax请求
          */
-        listenAjax() {
+       listenAjax() {
             if (!RnApiMap['debugAjax']) {
-                RnApiMap['debugAjax'] = (params: any) => {
-
-                }
+                RnApiMap['debugAjax'] = (params: any) => {}
             }
+       },
+
+       listenConsole() {
+           if (!RnApiMap['debugConsole']) {
+               RnApiMap['debugConsole'] = (params: any) => {
+                   const {type, content} = params;
+                   // @ts-ignore
+                   const print = console[type];
+                   print(...content);
+               }
+           }
        }
     }
 })();
