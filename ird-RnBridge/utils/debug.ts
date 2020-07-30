@@ -71,7 +71,12 @@ export function listenDebugConsole (send: (data: any) => void) {
     }
 
     window.addEventListener('proxyConsole', (e: any) => {
-        const detail = e.detail;
+        let detail = e.detail;
+        const {type, content} = e.detail;
+        if (type === 'error' && content.length === 1 && content[0] instanceof Error) {
+            const error = content[0];
+            detail.content = [error.message];
+        }
         send(detail)
     });
 }

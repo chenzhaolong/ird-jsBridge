@@ -31,6 +31,26 @@
         InitiatorType["XHR"] = "xmlhttprequest";
         InitiatorType["NAV"] = "navigation";
       })(InitiatorType = H5Side.InitiatorType || (H5Side.InitiatorType = {}));
+
+      let Debug;
+
+      (function (Debug) {
+        Debug["AJAX"] = "ajax";
+        Debug["CONSOLE"] = "console";
+      })(Debug = H5Side.Debug || (H5Side.Debug = {}));
+
+      let XHREvent;
+
+      (function (XHREvent) {
+        XHREvent["AJAX_ABORT"] = "ajaxAbort";
+        XHREvent["AJAX_ERROR"] = "ajaxError";
+        XHREvent["AJAX_LOAD"] = "ajaxLoad";
+        XHREvent["AJAX_LOAD_START"] = "ajaxLoadStart";
+        XHREvent["AJAX_PROGRESS"] = "ajaxProgress";
+        XHREvent["AJAX_TIMEOUT"] = "ajaxTimeout";
+        XHREvent["AJAX_LOAD_END"] = "ajaxLoadEnd";
+        XHREvent["AJAX_READY_STATE_CHANGE"] = "ajaxReadyStateChange";
+      })(XHREvent = H5Side.XHREvent || (H5Side.XHREvent = {}));
     })(H5Side || (H5Side = {}));
 
     /**
@@ -188,10 +208,106 @@
     }
 
     /**
+     * @file 事件发射器
+     */
+    class EventEmitter {
+      constructor(eventName) {
+        this.eventName = eventName;
+      }
+
+      dispatchEvent(data) {
+        if (CustomEvent) {
+          const event = new CustomEvent(this.eventName, {
+            detail: data
+          });
+          window.dispatchEvent(event);
+        }
+      }
+
+    }
+
+    /**
+     * @file debug调试
+     */
+    function listenDebugAjax(send) {
+      if (!window.addEventListener || !isFunction(window.addEventListener)) {
+        return;
+      }
+
+      window.addEventListener(H5Side.XHREvent.AJAX_LOAD_START, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_LOAD, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_ABORT, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_ERROR, e => {
+        // todo:处理数据
+        send(e);
+      });
+      window.addEventListener(H5Side.XHREvent.AJAX_TIMEOUT, e => {
+        // todo:处理数据
+        send(e);
+      });
+    }
+    function debugConsole() {
+      const methodsList = ['log', 'error', 'warn'];
+      methodsList.forEach(method => {
+        // @ts-ignore
+        const originFn = console[method]; // @ts-ignore
+
+        console[method] = (...rest) => {
+          const emitter = new EventEmitter('proxyConsole');
+          emitter.dispatchEvent({
+            type: method,
+            content: rest
+          });
+          originFn(...rest);
+        };
+      });
+    }
+    function listenDebugConsole(send) {
+      if (!window.addEventListener || !isFunction(window.addEventListener)) {
+        return;
+      }
+
+      window.addEventListener('proxyConsole', e => {
+        let detail = e.detail;
+        const {
+          type,
+          content
+        } = e.detail;
+
+        if (type === 'error' && content.length === 1 && content[0] instanceof Error) {
+          const error = content[0];
+          detail.content = [error.message];
+        }
+
+        send(detail);
+      });
+    }
+
+    /**
      * @file h5端的jsBridge的api
      * todo: 1）添加钩子函数
      */
-
     const H5SideApi = function () {
       // h5-side注册的方法
       let h5ApiMap = {}; // h5-side注册的回调
@@ -214,7 +330,7 @@
         startTime: 0,
         endTime: 0
       };
-      let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore']; // 异步等待postMessage重定义成功
+      let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore', 'debugAjax', 'debugConsole']; // 异步等待postMessage重定义成功
 
       function awaitPostMessage() {
         let queue = []; // @ts-ignore
@@ -319,26 +435,40 @@
                 }
 
                 break;
-              // case H5Side.types.SESSIONSTORE:
-              //     // @ts-ignore
-              //     const event = new CustomEvent('sessionStore');
-              //     event.initEvent();
-              //     event.dispatchEvent();
-              //     break;
             }
-          }); // // @ts-ignore
-          // document.addEventListener('sessionStore', (event: {data: string}) => {
-          //     let parseData;
-          //     try {
-          //         parseData = JSON.parse(event.data);
-          //     } catch(e) {
-          //         parseData = {};
-          //     }
-          //
-          //     if (h5ApiMap['getSessionStoreH5']) {
-          //         h5ApiMap['getSessionStoreH5'](parseData)
-          //     }
-          // })
+          });
+        }
+
+        if (window) {
+          const _send = (method, params) => {
+            let json = {
+              type: RnSide.types.RAPI,
+              response: {
+                params,
+                token: tokenFromRn
+              },
+              method: method
+            };
+
+            if (isCheckSuccess()) {
+              if (caniuse(method)) {
+                sendData(json);
+              }
+            } else {
+              consumeQueue.push(json);
+            }
+          };
+
+          listenDebugAjax(params => {
+            const method = 'debugAjax';
+
+            _send(method, params);
+          });
+          listenDebugConsole(params => {
+            const method = 'debugConsole';
+
+            _send(method, params);
+          });
         }
       } // 验证成功后初始化内部属性
 
@@ -589,8 +719,14 @@
           }
         },
 
+        /**
+         * 资源枚举
+         */
         HttpType: H5Side.InitiatorType,
 
+        /**
+         * 获取制定的store
+         */
         getSessionStore(keys, cb) {
           if (!keys) {
             throw new Error('key can not be undefined');
@@ -603,11 +739,27 @@
           });
         },
 
+        /**
+         * 异步获取store
+         */
         getSessionStoreAsync(key, cb) {
           let apiName = `getSessionStoreH5-${key}`;
 
           if (!h5ApiMap[apiName]) {
             h5ApiMap[apiName] = cb;
+          }
+        },
+
+        /**
+         * 开启调试功能
+         */
+        debug(type) {
+          switch (type) {
+            case H5Side.Debug.AJAX:
+              break;
+
+            case H5Side.Debug.CONSOLE:
+              debugConsole();
           }
         }
 
@@ -955,7 +1107,7 @@
               break;
 
             case RnSide.StoreTypes.DEL:
-              isStore = store.del(key, data);
+              isStore = store.del(key);
               break;
 
             case RnSide.StoreTypes.MOD:
@@ -1014,6 +1166,45 @@
         hasSessionStoreByKey(key) {
           const store = getStoreInstance();
           return store.get(key) && true;
+        },
+
+        /**
+         * 监听h5发布的ajax请求
+         */
+        listenAjax() {
+          if (!RnApiMap['debugAjax']) {
+            RnApiMap['debugAjax'] = params => {};
+          }
+        },
+
+        listenConsole() {
+          if (!RnApiMap['debugConsole']) {
+            RnApiMap['debugConsole'] = params => {
+              const {
+                type,
+                content
+              } = params; // @ts-ignore
+
+              const print = console.log;
+              let array = [];
+
+              switch (type) {
+                case 'log':
+                  array = [`%cRnBridge-${type}:`, 'color: white;background: #5496c7;display: block;font-size: 13px'].concat(content);
+                  break;
+
+                case 'warn':
+                  array = [`%cRnBridge-${type}:`, 'color: brown;background: #fffbe6;display: block;font-size: 13px'].concat(content);
+                  break;
+
+                case 'error':
+                  array = [`%cRnBridge-${type}:`, 'color: red;background: #fff0f0;display: block;font-size: 13px'].concat(content);
+                  break;
+              }
+
+              print(...array);
+            };
+          }
         }
 
       };

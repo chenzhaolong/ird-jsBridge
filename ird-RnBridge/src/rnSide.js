@@ -208,7 +208,7 @@ export const RnSideApi = (function () {
                     isStore = store.add(key, data);
                     break;
                 case RnSide.StoreTypes.DEL:
-                    isStore = store.del(key, data);
+                    isStore = store.del(key);
                     break;
                 case RnSide.StoreTypes.MOD:
                     isStore = store.modify(key, data);
@@ -260,6 +260,36 @@ export const RnSideApi = (function () {
         hasSessionStoreByKey(key) {
             const store = getStoreInstance();
             return store.get(key) && true;
+        },
+        /**
+         * 监听h5发布的ajax请求
+         */
+        listenAjax() {
+            if (!RnApiMap['debugAjax']) {
+                RnApiMap['debugAjax'] = (params) => { };
+            }
+        },
+        listenConsole() {
+            if (!RnApiMap['debugConsole']) {
+                RnApiMap['debugConsole'] = (params) => {
+                    const { type, content } = params;
+                    // @ts-ignore
+                    const print = console.log;
+                    let array = [];
+                    switch (type) {
+                        case 'log':
+                            array = [`%cRnBridge-${type}:`, 'color: white;background: #5496c7;display: block;font-size: 13px'].concat(content);
+                            break;
+                        case 'warn':
+                            array = [`%cRnBridge-${type}:`, 'color: brown;background: #fffbe6;display: block;font-size: 13px'].concat(content);
+                            break;
+                        case 'error':
+                            array = [`%cRnBridge-${type}:`, 'color: red;background: #fff0f0;display: block;font-size: 13px'].concat(content);
+                            break;
+                    }
+                    print(...array);
+                };
+            }
         }
     };
 })();

@@ -45,4 +45,9 @@ export declare const RnSideApi: {
      * 是否有该储存数据
      */
     hasSessionStoreByKey(key: string): boolean;
+    /**
+     * 监听h5发布的ajax请求
+     */
+    listenAjax(): void;
+    listenConsole(): void;
 };

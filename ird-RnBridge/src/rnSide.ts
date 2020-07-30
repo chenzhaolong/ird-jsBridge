@@ -290,8 +290,20 @@ export const RnSideApi = (function () {
                RnApiMap['debugConsole'] = (params: any) => {
                    const {type, content} = params;
                    // @ts-ignore
-                   const print = console[type];
-                   print(...content);
+                   const print = console.log;
+                   let array: Array<any> = [];
+                   switch (type) {
+                       case 'log':
+                           array = [`%cRnBridge-${type}:`, 'color: white;background: #5496c7;display: block;font-size: 13px'].concat(content);
+                           break;
+                       case 'warn':
+                           array = [`%cRnBridge-${type}:`, 'color: brown;background: #fffbe6;display: block;font-size: 13px'].concat(content);
+                           break;
+                       case 'error':
+                           array = [`%cRnBridge-${type}:`, 'color: red;background: #fff0f0;display: block;font-size: 13px'].concat(content);
+                           break;
+                   }
+                   print(...array);
                }
            }
        }

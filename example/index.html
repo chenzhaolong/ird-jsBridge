@@ -10,6 +10,7 @@
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
+      RnBridge.debug('console');
       RnBridge.initH5({
           h1: (params, send) => {
               alert(JSON.stringify(params));
@@ -30,6 +31,7 @@
           RnBridge.getSessionStore(['sat2'], (data) => {
               const content = document.getElementById('content');
               content.innerText = JSON.stringify(data);
+              console.log('data1', data);
           })
       });
       RnBridge.invokeRN({
@@ -73,11 +75,15 @@
       RnBridge.getSessionStoreAsync('sat1', (data) => {
           const content = document.getElementById('content');
           content.innerText = JSON.stringify(data) + 'sat1';
+          console.log('data3', data);
       });
       RnBridge.getSessionStoreAsync('sat', (data) => {
           const content = document.getElementById('content');
           content.innerText = JSON.stringify(data) + 'sat';
       });
+      console.log('data2', {});
+      console.warn('warn', '我就是这呀说过');
+      console.error(new Error('asdf'))
   </script>
 </body>
 </html>

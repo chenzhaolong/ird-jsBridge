@@ -6,7 +6,7 @@ import { H5Side } from '../interface/h5Side';
 import { RnSide } from '../interface/rnSide';
 import { getUID1, isBoolean, isFunction } from '../utils/index';
 import { getInitiatorPerformance, getPerformance } from '../utils/performance';
-// import {CustomEvent} from '../utils/customEvent';
+import { debugAjax, listenDebugAjax, debugConsole, listenDebugConsole } from '../utils/debug';
 export const H5SideApi = (function () {
     // h5-side注册的方法
     let h5ApiMap = {};
@@ -26,7 +26,7 @@ export const H5SideApi = (function () {
     let consumeQueue = [];
     // 桥梁建立时间
     let bridgeTime = { startTime: 0, endTime: 0 };
-    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore'];
+    let RnApiWhiteList = ['performanceCb', 'performanceTypeCb', 'getSessionStore', 'debugAjax', 'debugConsole'];
     // 异步等待postMessage重定义成功
     function awaitPostMessage() {
         let queue = [];
@@ -107,27 +107,33 @@ export const H5SideApi = (function () {
                             errorHandle(response);
                         }
                         break;
-                    // case H5Side.types.SESSIONSTORE:
-                    //     // @ts-ignore
-                    //     const event = new CustomEvent('sessionStore');
-                    //     event.initEvent();
-                    //     event.dispatchEvent();
-                    //     break;
                 }
             });
-            // // @ts-ignore
-            // document.addEventListener('sessionStore', (event: {data: string}) => {
-            //     let parseData;
-            //     try {
-            //         parseData = JSON.parse(event.data);
-            //     } catch(e) {
-            //         parseData = {};
-            //     }
-            //
-            //     if (h5ApiMap['getSessionStoreH5']) {
-            //         h5ApiMap['getSessionStoreH5'](parseData)
-            //     }
-            // })
+        }
+        if (window) {
+            const _send = (method, params) => {
+                let json = {
+                    type: RnSide.types.RAPI,
+                    response: { params, token: tokenFromRn },
+                    method: method
+                };
+                if (isCheckSuccess()) {
+                    if (caniuse(method)) {
+                        sendData(json);
+                    }
+                }
+                else {
+                    consumeQueue.push(json);
+                }
+            };
+            listenDebugAjax((params) => {
+                const method = 'debugAjax';
+                _send(method, params);
+            });
+            listenDebugConsole((params) => {
+                const method = 'debugConsole';
+                _send(method, params);
+            });
         }
     }
     // 验证成功后初始化内部属性
@@ -325,7 +331,13 @@ export const H5SideApi = (function () {
                 consumeQueue.push(json);
             }
         },
+        /**
+         * 资源枚举
+         */
         HttpType: H5Side.InitiatorType,
+        /**
+         * 获取制定的store
+         */
         getSessionStore(keys, cb) {
             if (!keys) {
                 throw new Error('key can not be undefined');
@@ -336,10 +348,27 @@ export const H5SideApi = (function () {
                 success: cb
             });
         },
+        /**
+         * 异步获取store
+         */
         getSessionStoreAsync(key, cb) {
             let apiName = `getSessionStoreH5-${key}`;
             if (!h5ApiMap[apiName]) {
                 h5ApiMap[apiName] = cb;
+            }
+        },
+        /**
+         * 开启调试功能
+         */
+        debug(type) {
+            switch (type) {
+                case H5Side.Debug.AJAX:
+                    debugAjax();
+                    break;
+                case H5Side.Debug.CONSOLE:
+                    debugConsole();
+                default:
+                    break;
             }
         }
     };

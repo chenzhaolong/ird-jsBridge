@@ -36,7 +36,20 @@ export declare const H5SideApi: {
      * 发送各种资源性能参数
      */
     sendPerformanceByType(type?: H5Side.InitiatorType): void;
+    /**
+     * 资源枚举
+     */
     HttpType: typeof H5Side.InitiatorType;
+    /**
+     * 获取制定的store
+     */
     getSessionStore(keys: string[], cb: (data: object) => any): void;
+    /**
+     * 异步获取store
+     */
     getSessionStoreAsync(key: string, cb: (data: object) => any): void;
+    /**
+     * 开启调试功能
+     */
+    debug(type: H5Side.Debug): void;
 };
