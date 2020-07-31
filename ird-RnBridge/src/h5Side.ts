@@ -389,10 +389,13 @@ export const H5SideApi = (function() {
         /**
          * 开启调试功能
          */
-        debug(type: H5Side.Debug) {
+        debug(type: H5Side.Debug, isStop: boolean = false) {
+            if (isStop) {
+                return
+            }
             switch(type) {
                 case H5Side.Debug.AJAX:
-                    debugAjax();
+                    // debugAjax();
                     break;
                 case H5Side.Debug.CONSOLE:
                     debugConsole();

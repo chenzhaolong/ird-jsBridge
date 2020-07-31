@@ -7,6 +7,7 @@
 <body>
   <div style="width: 100px; height: 200px; color: red" id="demo">nihao12</div>
   <div id="content"></div>
+  <button onclick="funcA()">点击</button>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
@@ -28,6 +29,7 @@
       RnBridge.checkSafety({demo: 'demo'}, () => {
           document.getElementById('demo').style.color = 'blue';
           // RnBridge.setTitle('设置');
+          console.log('bridge success');
           RnBridge.getSessionStore(['sat2'], (data) => {
               const content = document.getElementById('content');
               content.innerText = JSON.stringify(data);
@@ -40,10 +42,12 @@
           success: (result) => {
               document.getElementById('demo').style.color = 'green';
               document.getElementById('demo').innerText = JSON.stringify(result);
+              console.log('result', result);
           },
           fail: (result) => {
               document.getElementById('demo').style.color = 'red';
               document.getElementById('demo').innerText = JSON.stringify(result);
+              console.error('error', result);
           }
       });
       RnBridge.invokeRN({
@@ -52,10 +56,12 @@
           success: (result) => {
               document.getElementById('demo').style.color = 'green';
               document.getElementById('demo').innerText = JSON.stringify(result);
+              console.log('result1', result)
           },
           fail: (result) => {
               document.getElementById('demo').style.color = 'red';
               document.getElementById('demo').innerText = JSON.stringify(result);
+              console.error(new Error('wrong'));
           }
       });
       RnBridge.listenRN('h3', (params, send) => {
@@ -80,10 +86,14 @@
       RnBridge.getSessionStoreAsync('sat', (data) => {
           const content = document.getElementById('content');
           content.innerText = JSON.stringify(data) + 'sat';
+          console.log('sat', data);
       });
       console.log('data2', {});
       console.warn('warn', '我就是这呀说过');
       console.error(new Error('asdf'))
+      function funcA(e) {
+          console.log('e', e)
+      }
   </script>
 </body>
 </html>

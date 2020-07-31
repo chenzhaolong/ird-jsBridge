@@ -278,6 +278,7 @@ export const RnSideApi = (function () {
 
         /**
          * 监听h5发布的ajax请求
+         * todo: 暂时先hold住
          */
        listenAjax() {
             if (!RnApiMap['debugAjax']) {
