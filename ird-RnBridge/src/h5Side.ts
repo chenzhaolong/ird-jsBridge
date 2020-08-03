@@ -395,7 +395,7 @@ export const H5SideApi = (function() {
             }
             switch(type) {
                 case H5Side.Debug.AJAX:
-                    // debugAjax();
+                    debugAjax();
                     break;
                 case H5Side.Debug.CONSOLE:
                     debugConsole();

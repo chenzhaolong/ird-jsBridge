@@ -61,6 +61,7 @@ export namespace H5Side {
         AJAX_PROGRESS = 'ajaxProgress',
         AJAX_TIMEOUT = 'ajaxTimeout',
         AJAX_LOAD_END = 'ajaxLoadEnd',
-        AJAX_READY_STATE_CHANGE = 'ajaxReadyStateChange'
+        AJAX_READY_STATE_CHANGE = 'ajaxReadyStateChange',
+        AJAX_WARN = 'ajaxWarn'
     }
 }

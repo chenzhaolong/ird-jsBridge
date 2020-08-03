@@ -282,7 +282,14 @@ export const RnSideApi = (function () {
          */
        listenAjax() {
             if (!RnApiMap['debugAjax']) {
-                RnApiMap['debugAjax'] = (params: any) => {}
+                RnApiMap['debugAjax'] = (params: any) => {
+                    const {type, response} = params;
+                    switch (type) {
+                        case H5Side.XHREvent.AJAX_WARN:
+                            console.log('%cRnBridge-ajax-warn:', 'color: brown;background: #fffbe6;display: block;font-size: 13px', response);
+                            break;
+                    }
+                }
             }
        },
 
