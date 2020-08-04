@@ -283,10 +283,19 @@ export const RnSideApi = (function () {
        listenAjax() {
             if (!RnApiMap['debugAjax']) {
                 RnApiMap['debugAjax'] = (params: any) => {
-                    const {type, response} = params;
+                    const {type, content} = params;
                     switch (type) {
                         case H5Side.XHREvent.AJAX_WARN:
-                            console.log('%cRnBridge-ajax-warn:', 'color: brown;background: #fffbe6;display: block;font-size: 13px', response);
+                            console.log('%cRnBridge-Ajax-warn:', 'color: brown;background: #fffbe6;display: block;font-size: 13px', content.message);
+                            break;
+                        case H5Side.XHREvent.AJAX_ABORT:
+                        case H5Side.XHREvent.AJAX_TIMEOUT:
+                        case H5Side.XHREvent.AJAX_ERROR:
+                            console.log('%cRnBridge-Ajax-error:', 'color: red;background: #fff0f0;display: block;font-size: 13px', content.message, content.response);
+                            break;
+                        case H5Side.XHREvent.AJAX_PROGRESS:
+                        case H5Side.XHREvent.AJAX_READY_STATE_CHANGE:
+                            console.log('%cRnBridge-Ajax-success:', 'color: red;background: #fff0f0;display: block;font-size: 13px', content.message, content.response);
                             break;
                     }
                 }

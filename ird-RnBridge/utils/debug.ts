@@ -14,7 +14,7 @@ export function debugAjax() {
     // @ts-ignore
     if (!window.XMLHttpRequest || typeof window.XMLHttpRequest !== 'function') {
         EmitterHandler(H5Side.XHREvent.AJAX_WARN, {
-            response: 'XMLHttpRequest is not be define in window, please check the config of platform.'
+            message: 'XMLHttpRequest is not be define in window, please check the config of platform.'
         });
         return;
     }
@@ -24,51 +24,64 @@ export function debugAjax() {
         const realXHR = new oldXHR();
         realXHR.addEventListener('abort', () => {
             EmitterHandler(H5Side.XHREvent.AJAX_ABORT, {
-
+                message: `${realXHR.responseURL} is abort`,
+                response: {url: realXHR.responseURL, status: realXHR.status}
             });
         }, false);
 
-        realXHR.addEventListener('error', function () {
+        realXHR.addEventListener('error', function (e: any) {
             EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
-
-            });
-        }, false);
-
-        realXHR.addEventListener('load', function () {
-            EmitterHandler(H5Side.XHREvent.AJAX_LOAD, {
-
-            });
-        }, false);
-
-        realXHR.addEventListener('loadstart', function () {
-            EmitterHandler(H5Side.XHREvent.AJAX_LOAD_START, {
-
-            });
-        }, false);
-
-        realXHR.addEventListener('progress', function () {
-            EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
-
+                message: `${realXHR.responseURL} is error`,
+                response: {url: realXHR.responseURL, status: realXHR.status, errorMsg: e.message}
             });
         }, false);
 
         realXHR.addEventListener('timeout', function () {
             EmitterHandler(H5Side.XHREvent.AJAX_TIMEOUT, {
-
+                message: `${realXHR.responseURL} is timeout`,
+                response: {url: realXHR.responseURL, status: realXHR.status, timeout: realXHR.timeout}
             });
         }, false);
 
-        realXHR.addEventListener('loadend', function () {
-            EmitterHandler(H5Side.XHREvent.AJAX_LOAD_END, {
-
+        realXHR.addEventListener('progress', function () {
+            EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
+                message: 'progress is success',
+                response: {
+                    url: realXHR.responseURL,
+                    status: realXHR.status,
+                    data: realXHR.response,
+                    responseType: realXHR.responseType,
+                    statusText: realXHR.statusText
+                }
             });
         }, false);
 
         realXHR.addEventListener('readystatechange', function() {
+            if (realXHR.readyState !== 4) {
+                return
+            }
             EmitterHandler(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, {
-
+                message: `${realXHR.responseURL} is success`,
+                response: {
+                    url: realXHR.responseURL,
+                    status: realXHR.status,
+                    data: realXHR.response,
+                    responseType: realXHR.responseType,
+                    statusText: realXHR.statusText,
+                    headers: realXHR.getAllResponseHeaders()
+                }
             });
         }, false);
+
+        // realXHR.addEventListener('load', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD, {});
+        // }, false);
+        // realXHR.addEventListener('loadstart', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_START, {});
+        // }, false);
+        // realXHR.addEventListener('loadend', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_END, {});
+        // }, false);
 
         return realXHR;
     };
@@ -80,40 +93,56 @@ export function listenDebugAjax (send: (data: any) => void) {
     if (!window.addEventListener || !isFunction(window.addEventListener)) {
         return
     }
-    window.addEventListener(H5Side.XHREvent.AJAX_LOAD_START, (e: object) => {
-        // todo:处理数据
-        send(e)
+    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_START, (e: object) => {
+    //     send(e)
+    // });
+    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD, (e: object) => {
+    //     send(e)
+    // });
+    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, (e: object) => {
+    //     send(e)
+    // });
+
+    window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_PROGRESS,
+            content: e.detail
+        })
     });
-    window.addEventListener(H5Side.XHREvent.AJAX_LOAD, (e: object) => {
-        // todo:处理数据
-        send(e)
+
+    window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_READY_STATE_CHANGE,
+            content: e.detail
+        })
     });
-    window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, (e: object) => {
-        // todo:处理数据
-        send(e)
+
+    window.addEventListener(H5Side.XHREvent.AJAX_ABORT, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_ABORT,
+            content: e.detail
+        })
     });
-    window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: object) => {
-        // todo:处理数据
-        send(e)
+
+    window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_ERROR,
+            content: e.detail
+        })
     });
-    window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, (e: object) => {
-        // todo:处理数据
-        send(e)
+
+    window.addEventListener(H5Side.XHREvent.AJAX_TIMEOUT, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_TIMEOUT,
+            content: e.detail
+        })
     });
-    window.addEventListener(H5Side.XHREvent.AJAX_ABORT, (e: object) => {
-        // todo:处理数据
-        send(e)
-    });
-    window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e: object) => {
-        // todo:处理数据
-        send(e)
-    });
-    window.addEventListener(H5Side.XHREvent.AJAX_TIMEOUT, (e: object) => {
-        // todo:处理数据
-        send(e)
-    });
-    window.addEventListener(H5Side.XHREvent.AJAX_WARN, (e: object) => {
-        send(e);
+
+    window.addEventListener(H5Side.XHREvent.AJAX_WARN, (e: {[key: string]: any}) => {
+        send({
+            type: H5Side.XHREvent.AJAX_WARN,
+            content: e.detail
+        });
     })
 }
 
