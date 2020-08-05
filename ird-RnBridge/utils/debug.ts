@@ -20,7 +20,7 @@ export function debugAjax() {
     }
     // @ts-ignore
     const oldXHR = window.XMLHttpRequest;
-    const newXHR = () => {
+    function newXHR () {
         const realXHR = new oldXHR();
         realXHR.addEventListener('abort', () => {
             EmitterHandler(H5Side.XHREvent.AJAX_ABORT, {
@@ -84,7 +84,30 @@ export function debugAjax() {
         // }, false);
 
         return realXHR;
-    };
+    }
+
+    // @ts-ignore
+    const oldOpen = window.XMLHttpRequest.prototype.open;
+    function newOpen (method: string, url: string, async: any, user: any, password: any) {
+        // @ts-ignore
+        this._tmpMethod = method;
+        // @ts-ignore
+        return oldOpen.apply(this, arguments);
+    }
+
+    // @ts-ignore
+    const oldSend = window.XMLHttpRequest.prototype.send;
+    function newSend (body: any) {
+        // @ts-ignore
+        this._tmpBody = body;
+        // @ts-ignore
+        return oldSend.apply(this, arguments);
+    }
+
+    // @ts-ignore
+    window.XMLHttpRequest.prototype.open = newOpen;
+    // @ts-ignore
+    window.XMLHttpRequest.prototype.send = newSend;
     // @ts-ignore
     window.XMLHttpRequest = newXHR;
 }

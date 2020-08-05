@@ -295,7 +295,9 @@ export const RnSideApi = (function () {
                             break;
                         case H5Side.XHREvent.AJAX_PROGRESS:
                         case H5Side.XHREvent.AJAX_READY_STATE_CHANGE:
-                            console.log('%cRnBridge-Ajax-success:', 'color: red;background: #fff0f0;display: block;font-size: 13px', content.message, content.response);
+                            console.groupCollapsed('%cRnBridge-Ajax-success:', 'color: white;background: #b4df53;display: block;font-size: 13px', content.message);
+                            console.log(content.response);
+                            console.groupEnd();
                             break;
                     }
                 }

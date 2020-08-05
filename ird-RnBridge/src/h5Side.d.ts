@@ -51,5 +51,5 @@ export declare const H5SideApi: {
     /**
      * 开启调试功能
      */
-    debug(type: H5Side.Debug): void;
+    debug(type: H5Side.Debug, isStop?: boolean): void;
 };

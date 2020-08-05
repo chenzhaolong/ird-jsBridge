@@ -9,11 +9,21 @@ const path = require('path');
 const server = http.createServer((req, res) => {
     // 不管是什么请求，对文件的请求的话，应该是针对后缀名进行内容读取发放。
     let suffix = req.url.substr(req.url.length - 2, req.url.length);
+    console.log(req.url)
     if (suffix === 'js') {
         res.writeHead(200,{"content-type":"application/javascript"});
-        const htmlPath = path.join(__dirname, '../ird-RnBridge/dist/RnBridge.js');
-        const html = fs.readFileSync(htmlPath);
-        res.write(html);
+        let jsPath;
+        if (req.url === '/ird-RnBridge/dist/RnBridge.js') {
+            jsPath = path.join(__dirname, '../ird-RnBridge/dist/RnBridge.js');
+        } else if (req.url === '/superagent.js') {
+            jsPath = path.join(__dirname, './superagent.js');
+        }
+
+        const js = fs.readFileSync(jsPath);
+        res.write(js);
+        res.end();
+    }  else if (req.url === '/demo/a') {
+        res.write('jinao');
         res.end();
     } else {
         res.writeHead(200,{"content-type":"text/html"});

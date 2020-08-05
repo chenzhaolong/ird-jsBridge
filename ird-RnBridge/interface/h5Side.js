@@ -37,5 +37,6 @@ export var H5Side;
         XHREvent["AJAX_TIMEOUT"] = "ajaxTimeout";
         XHREvent["AJAX_LOAD_END"] = "ajaxLoadEnd";
         XHREvent["AJAX_READY_STATE_CHANGE"] = "ajaxReadyStateChange";
+        XHREvent["AJAX_WARN"] = "ajaxWarn";
     })(XHREvent = H5Side.XHREvent || (H5Side.XHREvent = {}));
 })(H5Side || (H5Side = {}));

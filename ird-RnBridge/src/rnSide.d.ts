@@ -47,6 +47,7 @@ export declare const RnSideApi: {
     hasSessionStoreByKey(key: string): boolean;
     /**
      * 监听h5发布的ajax请求
+     * todo: 暂时先hold住
      */
     listenAjax(): void;
     listenConsole(): void;

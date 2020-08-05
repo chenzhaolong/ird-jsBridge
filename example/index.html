@@ -9,9 +9,11 @@
   <div id="content"></div>
   <button onclick="funcA()">点击</button>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
+  <script type="text/javascript" src="superagent.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
       RnBridge.debug('console');
+      RnBridge.debug('ajax');
       RnBridge.initH5({
           h1: (params, send) => {
               alert(JSON.stringify(params));
@@ -94,6 +96,17 @@
       function funcA(e) {
           console.log('e', e)
       }
+  </script>
+  <script>
+      superagent
+          .post('/demo/a')
+          .send({a: 1})
+          .then(res => {
+              console.log('res', res);
+          })
+          .catch(err => {
+              console.log(err);
+          });
   </script>
 </body>
 </html>

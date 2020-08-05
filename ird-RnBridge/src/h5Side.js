@@ -360,7 +360,10 @@ export const H5SideApi = (function () {
         /**
          * 开启调试功能
          */
-        debug(type) {
+        debug(type, isStop = false) {
+            if (isStop) {
+                return;
+            }
             switch (type) {
                 case H5Side.Debug.AJAX:
                     debugAjax();
