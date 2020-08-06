@@ -25,6 +25,9 @@ const server = http.createServer((req, res) => {
     }  else if (req.url === '/demo/a') {
         res.write('jinao');
         res.end();
+    } else if (req.url === '/demo/a1') {
+        res.writeHead(400);
+        res.end();
     } else {
         res.writeHead(200,{"content-type":"text/html"});
         const htmlPath = path.join(__dirname, './index.html');

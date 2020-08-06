@@ -251,42 +251,35 @@
         const realXHR = new oldXHR();
         realXHR.addEventListener('abort', () => {
           EmitterHandler(H5Side.XHREvent.AJAX_ABORT, {
-            message: `${realXHR.responseURL} is abort`,
+            message: `${realXHR._tmpUrl} is abort`,
             response: {
-              url: realXHR.responseURL,
-              status: realXHR.status
-            }
-          });
-        }, false);
-        realXHR.addEventListener('error', function (e) {
-          EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
-            message: `${realXHR.responseURL} is error`,
-            response: {
-              url: realXHR.responseURL,
+              url: realXHR._tmpUrl,
               status: realXHR.status,
-              errorMsg: e.message
+              time: realXHR._tmpSendTimeStr,
+              cost: `${Date.now() - realXHR._startTime}ms`
             }
           });
-        }, false);
+        }, false); // realXHR.addEventListener('error', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
+        //         message: `${realXHR._tmpUrl} is error`,
+        //         response: {
+        //             url: realXHR._tmpUrl,
+        //             status: realXHR.status,
+        //             time: realXHR._tmpSendTimeStr,
+        //             cost: `${Date.now() - realXHR._startTime}ms`
+        //         }
+        //     });
+        // }, false);
+
         realXHR.addEventListener('timeout', function () {
           EmitterHandler(H5Side.XHREvent.AJAX_TIMEOUT, {
-            message: `${realXHR.responseURL} is timeout`,
+            message: `${realXHR._tmpUrl} is timeout`,
             response: {
-              url: realXHR.responseURL,
+              url: realXHR._tmpUrl,
               status: realXHR.status,
-              timeout: realXHR.timeout
-            }
-          });
-        }, false);
-        realXHR.addEventListener('progress', function () {
-          EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
-            message: 'progress is success',
-            response: {
-              url: realXHR.responseURL,
-              status: realXHR.status,
-              data: realXHR.response,
-              responseType: realXHR.responseType,
-              statusText: realXHR.statusText
+              timeout: realXHR.timeout,
+              time: realXHR._tmpSendTimeStr,
+              cost: `${Date.now() - realXHR._startTime}ms`
             }
           });
         }, false);
@@ -295,17 +288,38 @@
             return;
           }
 
-          EmitterHandler(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, {
-            message: `${realXHR.responseURL} is success`,
-            response: {
-              url: realXHR.responseURL,
-              status: realXHR.status,
-              data: realXHR.response,
-              responseType: realXHR.responseType,
-              statusText: realXHR.statusText,
-              headers: realXHR.getAllResponseHeaders()
-            }
-          });
+          if (realXHR.status >= 200 && realXHR.status < 300 || realXHR.status === 304) {
+            EmitterHandler(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, {
+              message: `${realXHR._tmpUrl} is success`,
+              response: {
+                url: realXHR.responseURL,
+                status: realXHR.status,
+                data: realXHR.response,
+                responseType: realXHR.responseType,
+                statusText: realXHR.statusText,
+                headers: realXHR.getAllResponseHeaders(),
+                method: realXHR._tmpMethod,
+                bodyOrParams: realXHR._tmpBody,
+                time: realXHR._tmpSendTimeStr,
+                cost: `${Date.now() - realXHR._startTime}ms`
+              }
+            });
+          } else {
+            EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
+              message: `${realXHR._tmpUrl} is error`,
+              response: {
+                url: realXHR._tmpUrl,
+                status: realXHR.status,
+                data: realXHR.response,
+                statusText: realXHR.statusText,
+                headers: realXHR.getAllResponseHeaders(),
+                method: realXHR._tmpMethod,
+                bodyOrParams: realXHR._tmpBody,
+                time: realXHR._tmpSendTimeStr,
+                cost: `${Date.now() - realXHR._startTime}ms`
+              }
+            });
+          }
         }, false); // realXHR.addEventListener('load', function () {
         //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD, {});
         // }, false);
@@ -314,6 +328,18 @@
         // }, false);
         // realXHR.addEventListener('loadend', function () {
         //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_END, {});
+        // }, false);
+        // realXHR.addEventListener('progress', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
+        //         message: 'progress is success',
+        //         response: {
+        //             url: realXHR.responseURL,
+        //             status: realXHR.status,
+        //             data: realXHR.response,
+        //             responseType: realXHR.responseType,
+        //             statusText: realXHR.statusText
+        //         }
+        //     });
         // }, false);
 
         return realXHR;
@@ -326,6 +352,8 @@
         // @ts-ignore
         this._tmpMethod = method; // @ts-ignore
 
+        this._tmpUrl = url; // @ts-ignore
+
         return oldOpen.apply(this, arguments);
       } // @ts-ignore
 
@@ -333,8 +361,13 @@
       const oldSend = window.XMLHttpRequest.prototype.send;
 
       function newSend(body) {
-        // @ts-ignore
+        const date = new Date(); // @ts-ignore
+
         this._tmpBody = body; // @ts-ignore
+
+        this._tmpSendTimeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-${date.getMilliseconds()}`; // @ts-ignore
+
+        this._startTime = date.getTime(); // @ts-ignore
 
         return oldSend.apply(this, arguments);
       } // @ts-ignore
@@ -358,14 +391,14 @@
       // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, (e: object) => {
       //     send(e)
       // });
+      // window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: {[key: string]: any}) => {
+      //     send({
+      //         type: H5Side.XHREvent.AJAX_PROGRESS,
+      //         content: e.detail
+      //     })
+      // });
 
 
-      window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, e => {
-        send({
-          type: H5Side.XHREvent.AJAX_PROGRESS,
-          content: e.detail
-        });
-      });
       window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, e => {
         send({
           type: H5Side.XHREvent.AJAX_READY_STATE_CHANGE,
@@ -1305,30 +1338,34 @@
 
         /**
          * 监听h5发布的ajax请求
-         * todo: 暂时先hold住
          */
         listenAjax() {
           if (!RnApiMap['debugAjax']) {
+            let count = 0;
+
             RnApiMap['debugAjax'] = params => {
               const {
                 type,
                 content
               } = params;
+              count += 1;
 
               switch (type) {
                 case H5Side.XHREvent.AJAX_WARN:
-                  console.log('%cRnBridge-Ajax-warn:', 'color: brown;background: #fffbe6;display: block;font-size: 13px', content.message);
+                  console.log(`%cRnBridge-Ajax${count}-warn:`, 'color: brown;background: #fffbe6;display: block;font-size: 13px', content.response.time, content.message);
                   break;
 
                 case H5Side.XHREvent.AJAX_ABORT:
                 case H5Side.XHREvent.AJAX_TIMEOUT:
                 case H5Side.XHREvent.AJAX_ERROR:
-                  console.log('%cRnBridge-Ajax-error:', 'color: red;background: #fff0f0;display: block;font-size: 13px', content.message, content.response);
+                  console.groupCollapsed(`%cRnBridge-Ajax${count}-error:`, 'color: red;background: #fff0f0;display: block;font-size: 13px', content.response.time, content.message);
+                  console.log(content.response);
+                  console.groupEnd();
                   break;
 
                 case H5Side.XHREvent.AJAX_PROGRESS:
                 case H5Side.XHREvent.AJAX_READY_STATE_CHANGE:
-                  console.groupCollapsed('%cRnBridge-Ajax-success:', 'color: white;background: #b4df53;display: block;font-size: 13px', content.message);
+                  console.groupCollapsed(`%cRnBridge-Ajax${count}-success:`, 'color: white;background: #b4df53;display: block;font-size: 13px', content.response.time, content.message);
                   console.log(content.response);
                   console.groupEnd();
                   break;

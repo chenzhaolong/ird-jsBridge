@@ -1,6 +1,7 @@
 /**
  * @file debug调试
  */
+
 import {H5Side} from '../interface/h5Side';
 import {isFunction} from './index';
 import {EventEmitter} from './eventEmitter';
@@ -24,34 +25,25 @@ export function debugAjax() {
         const realXHR = new oldXHR();
         realXHR.addEventListener('abort', () => {
             EmitterHandler(H5Side.XHREvent.AJAX_ABORT, {
-                message: `${realXHR.responseURL} is abort`,
-                response: {url: realXHR.responseURL, status: realXHR.status}
-            });
-        }, false);
-
-        realXHR.addEventListener('error', function (e: any) {
-            EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
-                message: `${realXHR.responseURL} is error`,
-                response: {url: realXHR.responseURL, status: realXHR.status, errorMsg: e.message}
+                message: `${realXHR._tmpUrl} is abort`,
+                response: {
+                    url: realXHR._tmpUrl,
+                    status: realXHR.status,
+                    time: realXHR._tmpSendTimeStr,
+                    cost: `${Date.now() - realXHR._startTime}ms`
+                }
             });
         }, false);
 
         realXHR.addEventListener('timeout', function () {
             EmitterHandler(H5Side.XHREvent.AJAX_TIMEOUT, {
-                message: `${realXHR.responseURL} is timeout`,
-                response: {url: realXHR.responseURL, status: realXHR.status, timeout: realXHR.timeout}
-            });
-        }, false);
-
-        realXHR.addEventListener('progress', function () {
-            EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
-                message: 'progress is success',
+                message: `${realXHR._tmpUrl} is timeout`,
                 response: {
-                    url: realXHR.responseURL,
+                    url: realXHR._tmpUrl,
                     status: realXHR.status,
-                    data: realXHR.response,
-                    responseType: realXHR.responseType,
-                    statusText: realXHR.statusText
+                    timeout: realXHR.timeout,
+                    time: realXHR._tmpSendTimeStr,
+                    cost: `${Date.now() - realXHR._startTime}ms`
                 }
             });
         }, false);
@@ -60,17 +52,39 @@ export function debugAjax() {
             if (realXHR.readyState !== 4) {
                 return
             }
-            EmitterHandler(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, {
-                message: `${realXHR.responseURL} is success`,
-                response: {
-                    url: realXHR.responseURL,
-                    status: realXHR.status,
-                    data: realXHR.response,
-                    responseType: realXHR.responseType,
-                    statusText: realXHR.statusText,
-                    headers: realXHR.getAllResponseHeaders()
-                }
-            });
+            if ((realXHR.status >= 200 && realXHR.status < 300) || realXHR.status === 304) {
+                EmitterHandler(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, {
+                    message: `${realXHR._tmpUrl} is success`,
+                    response: {
+                        url: realXHR.responseURL,
+                        status: realXHR.status,
+                        data: realXHR.response,
+                        responseType: realXHR.responseType,
+                        statusText: realXHR.statusText,
+                        headers: realXHR.getAllResponseHeaders(),
+                        method: realXHR._tmpMethod,
+                        bodyOrParams: realXHR._tmpBody,
+                        time: realXHR._tmpSendTimeStr,
+                        cost: `${Date.now() - realXHR._startTime}ms`
+                    }
+                });
+            } else {
+                EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
+                    message: `${realXHR._tmpUrl} is error`,
+                    response: {
+                        url: realXHR._tmpUrl,
+                        status: realXHR.status,
+                        data: realXHR.response,
+                        statusText: realXHR.statusText,
+                        headers: realXHR.getAllResponseHeaders(),
+                        method: realXHR._tmpMethod,
+                        bodyOrParams: realXHR._tmpBody,
+                        time: realXHR._tmpSendTimeStr,
+                        cost: `${Date.now() - realXHR._startTime}ms`
+                    }
+                });
+            }
+
         }, false);
 
         // realXHR.addEventListener('load', function () {
@@ -82,6 +96,29 @@ export function debugAjax() {
         // realXHR.addEventListener('loadend', function () {
         //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_END, {});
         // }, false);
+        // realXHR.addEventListener('progress', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
+        //         message: 'progress is success',
+        //         response: {
+        //             url: realXHR.responseURL,
+        //             status: realXHR.status,
+        //             data: realXHR.response,
+        //             responseType: realXHR.responseType,
+        //             statusText: realXHR.statusText
+        //         }
+        //     });
+        // }, false);
+        // realXHR.addEventListener('error', function () {
+        //     EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
+        //         message: `${realXHR._tmpUrl} is error`,
+        //         response: {
+        //             url: realXHR._tmpUrl,
+        //             status: realXHR.status,
+        //             time: realXHR._tmpSendTimeStr,
+        //             cost: `${Date.now() - realXHR._startTime}ms`
+        //         }
+        //     });
+        // }, false);
 
         return realXHR;
     }
@@ -92,14 +129,21 @@ export function debugAjax() {
         // @ts-ignore
         this._tmpMethod = method;
         // @ts-ignore
+        this._tmpUrl = url;
+        // @ts-ignore
         return oldOpen.apply(this, arguments);
     }
 
     // @ts-ignore
     const oldSend = window.XMLHttpRequest.prototype.send;
     function newSend (body: any) {
+        const date = new Date();
         // @ts-ignore
         this._tmpBody = body;
+        // @ts-ignore
+        this._tmpSendTimeStr = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}-${date.getMilliseconds()}`;
+        // @ts-ignore
+        this._startTime = date.getTime();
         // @ts-ignore
         return oldSend.apply(this, arguments);
     }
@@ -125,13 +169,18 @@ export function listenDebugAjax (send: (data: any) => void) {
     // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, (e: object) => {
     //     send(e)
     // });
-
-    window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: {[key: string]: any}) => {
-        send({
-            type: H5Side.XHREvent.AJAX_PROGRESS,
-            content: e.detail
-        })
-    });
+    // window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: {[key: string]: any}) => {
+    //     send({
+    //         type: H5Side.XHREvent.AJAX_PROGRESS,
+    //         content: e.detail
+    //     })
+    // });
+    // window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e: {[key: string]: any}) => {
+    //     send({
+    //         type: H5Side.XHREvent.AJAX_ERROR,
+    //         content: e.detail
+    //     })
+    // });
 
     window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, (e: {[key: string]: any}) => {
         send({
@@ -143,13 +192,6 @@ export function listenDebugAjax (send: (data: any) => void) {
     window.addEventListener(H5Side.XHREvent.AJAX_ABORT, (e: {[key: string]: any}) => {
         send({
             type: H5Side.XHREvent.AJAX_ABORT,
-            content: e.detail
-        })
-    });
-
-    window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e: {[key: string]: any}) => {
-        send({
-            type: H5Side.XHREvent.AJAX_ERROR,
             content: e.detail
         })
     });

@@ -107,6 +107,33 @@
           .catch(err => {
               console.log(err);
           });
+      superagent
+          .get('/demo/a')
+          .query({a: 1})
+          .then(res => {
+              console.log('res1', res);
+          })
+          .catch(err => {
+              console.log(err);
+          });
+      superagent
+          .post('/demo/a1')
+          .send({a1: 112})
+          .then(res => {
+              console.log('res2', res);
+          })
+          .catch(err => {
+              console.log(err);
+          });
+      superagent
+          .post('http://192.168.1.102:9002/demo/a')
+          .send({a1: 112})
+          .then(res => {
+              console.log('res2', res);
+          })
+          .catch(err => {
+              console.log(err);
+          });
   </script>
 </body>
 </html>
