@@ -292,14 +292,14 @@ export const RnSideApi = (function () {
                         case H5Side.XHREvent.AJAX_ABORT:
                         case H5Side.XHREvent.AJAX_TIMEOUT:
                         case H5Side.XHREvent.AJAX_ERROR:
-                            console.groupCollapsed(`%cRnBridge-Ajax${count}-error:`, 'color: red;background: #fff0f0;display: block;font-size: 13px', content.response.time, content.message);
-                            console.log('response:', content.response);
+                            console.groupCollapsed(`%cRnBridge-Ajax${count}-error:`, 'color: red;background: #fff0f0;display: block;font-size: 13px', content.response.time, content.message, content.response.method);
+                            console.log('%cresponse:', 'color: red', content.response);
                             console.groupEnd();
                             break;
                         case H5Side.XHREvent.AJAX_PROGRESS:
                         case H5Side.XHREvent.AJAX_READY_STATE_CHANGE:
-                            console.groupCollapsed(`%cRnBridge-Ajax${count}-success:`, 'color: white;background: #b4df53;display: block;font-size: 13px', content.response.time, content.message);
-                            console.log('response:', content.response);
+                            console.groupCollapsed(`%cRnBridge-Ajax${count}-success:`, 'color: white;background: #b4df53;display: block;font-size: 13px', content.response.time, content.message, content.response.method);
+                            console.log('%cresponse:', 'color: green', content.response);
                             console.groupEnd();
                             break;
                     }

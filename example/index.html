@@ -10,6 +10,7 @@
   <button onclick="funcA()">点击</button>
   <script type="text/javascript" src="../ird-RnBridge/dist/RnBridge.js"></script>
   <script type="text/javascript" src="superagent.js"></script>
+  <script type="text/javascript" src="axios.js"></script>
   <script>
       RnBridge.switchMode({mode: 'h5'});
       RnBridge.debug('console');
@@ -98,42 +99,53 @@
       }
   </script>
   <script>
-      superagent
-          .post('/demo/a')
-          .send({a: 1})
+       axios
+          .post('/demo/a', {
+            firstName: 'Fred',
+            lastName: 'Flintstone'
+          })
           .then(res => {
               console.log('res', res);
           })
           .catch(err => {
               console.log(err);
           });
-      superagent
-          .get('/demo/a')
-          .query({a: 1})
+      axios
+          .get('/demo/a', {
+            params: {ID: 12345}
+          })
           .then(res => {
               console.log('res1', res);
           })
           .catch(err => {
               console.log(err);
           });
-      superagent
-          .post('/demo/a1')
-          .send({a1: 112})
+       axios
+          .post('/demo/a1', {a1: 112})
           .then(res => {
               console.log('res2', res);
           })
           .catch(err => {
               console.log(err);
           });
-      superagent
-          .post('http://192.168.1.102:9002/demo/a')
-          .send({a1: 112})
+       axios
+          .post('http://192.168.1.102:9002/demo/a', {a1: 112})
           .then(res => {
               console.log('res2', res);
           })
           .catch(err => {
               console.log(err);
           });
+       axios
+               .get('/demo/a', {
+                 params: {ID: 12345}
+               })
+               .then(res => {
+                 console.log('res1', res);
+               })
+               .catch(err => {
+                 console.log(err);
+               });
   </script>
 </body>
 </html>

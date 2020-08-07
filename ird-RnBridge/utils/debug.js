@@ -31,17 +31,6 @@ export function debugAjax() {
                 }
             });
         }, false);
-        // realXHR.addEventListener('error', function () {
-        //     EmitterHandler(H5Side.XHREvent.AJAX_ERROR, {
-        //         message: `${realXHR._tmpUrl} is error`,
-        //         response: {
-        //             url: realXHR._tmpUrl,
-        //             status: realXHR.status,
-        //             time: realXHR._tmpSendTimeStr,
-        //             cost: `${Date.now() - realXHR._startTime}ms`
-        //         }
-        //     });
-        // }, false);
         realXHR.addEventListener('timeout', function () {
             EmitterHandler(H5Side.XHREvent.AJAX_TIMEOUT, {
                 message: `${realXHR._tmpUrl} is timeout`,
@@ -92,27 +81,6 @@ export function debugAjax() {
                 });
             }
         }, false);
-        // realXHR.addEventListener('load', function () {
-        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD, {});
-        // }, false);
-        // realXHR.addEventListener('loadstart', function () {
-        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_START, {});
-        // }, false);
-        // realXHR.addEventListener('loadend', function () {
-        //     EmitterHandler(H5Side.XHREvent.AJAX_LOAD_END, {});
-        // }, false);
-        // realXHR.addEventListener('progress', function () {
-        //     EmitterHandler(H5Side.XHREvent.AJAX_PROGRESS, {
-        //         message: 'progress is success',
-        //         response: {
-        //             url: realXHR.responseURL,
-        //             status: realXHR.status,
-        //             data: realXHR.response,
-        //             responseType: realXHR.responseType,
-        //             statusText: realXHR.statusText
-        //         }
-        //     });
-        // }, false);
         return realXHR;
     }
     // @ts-ignore
@@ -149,21 +117,12 @@ export function listenDebugAjax(send) {
     if (!window.addEventListener || !isFunction(window.addEventListener)) {
         return;
     }
-    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_START, (e: object) => {
-    //     send(e)
-    // });
-    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD, (e: object) => {
-    //     send(e)
-    // });
-    // window.addEventListener(H5Side.XHREvent.AJAX_LOAD_END, (e: object) => {
-    //     send(e)
-    // });
-    // window.addEventListener(H5Side.XHREvent.AJAX_PROGRESS, (e: {[key: string]: any}) => {
-    //     send({
-    //         type: H5Side.XHREvent.AJAX_PROGRESS,
-    //         content: e.detail
-    //     })
-    // });
+    window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e) => {
+        send({
+            type: H5Side.XHREvent.AJAX_ERROR,
+            content: e.detail
+        });
+    });
     window.addEventListener(H5Side.XHREvent.AJAX_READY_STATE_CHANGE, (e) => {
         send({
             type: H5Side.XHREvent.AJAX_READY_STATE_CHANGE,
@@ -173,12 +132,6 @@ export function listenDebugAjax(send) {
     window.addEventListener(H5Side.XHREvent.AJAX_ABORT, (e) => {
         send({
             type: H5Side.XHREvent.AJAX_ABORT,
-            content: e.detail
-        });
-    });
-    window.addEventListener(H5Side.XHREvent.AJAX_ERROR, (e) => {
-        send({
-            type: H5Side.XHREvent.AJAX_ERROR,
             content: e.detail
         });
     });

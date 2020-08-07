@@ -17,6 +17,8 @@ const server = http.createServer((req, res) => {
             jsPath = path.join(__dirname, '../ird-RnBridge/dist/RnBridge.js');
         } else if (req.url === '/superagent.js') {
             jsPath = path.join(__dirname, './superagent.js');
+        } else if (req.url === '/axios.js') {
+            jsPath = path.join(__dirname, './axios.js');
         }
 
         const js = fs.readFileSync(jsPath);
