@@ -159,7 +159,7 @@ export const H5SideApi = (function() {
             bridgeTime.endTime = Date.now(); // 只有建立桥梁才有结束时间
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
-            invokeCallback(callbackId, {isSuccess: true, params: ''});
+            invokeCallback(callbackId, {isSuccess: true, params: response.params});
             if (consumeQueue.length > 0) {
                 consumeQueue.forEach((json: object) => {
                     // @ts-ignore
