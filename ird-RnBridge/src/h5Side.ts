@@ -363,6 +363,11 @@ export const H5SideApi = (function() {
         HttpType: H5Side.InitiatorType,
 
         /**
+         * Debug枚举
+         */
+        DebugType: H5Side.Debug,
+
+        /**
          * 获取制定的store
          */
         getSessionStore(keys: Array<string>, cb: (data: object) => any) {
