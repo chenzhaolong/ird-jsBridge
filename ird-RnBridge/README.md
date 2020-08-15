@@ -140,12 +140,20 @@ Rnbridge.getSessionStoreAsync(key, cb)
 
 11 . debug：调试h5侧的代码，rn侧需要额外各自类型进行监听listenAjax，listenConsole
 
-
 ```
 Rnbridge.debug(type, isStop)
 
 type: 类型，有console和ajax两种模式；
 istop：停止监听
+```
+
+12 . DebugType: 调试的类型
+
+```
+{
+    AJAX = 'ajax',
+    CONSOLE = 'console'
+}
 ```
 
 
