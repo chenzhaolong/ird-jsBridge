@@ -301,7 +301,7 @@ export const H5SideApi = (function() {
          * 监听rn-side调用的方法
          * @param cb 参数
          */
-        listenRN(method: string, cb: () => {}) {
+        listenRN(method: string, cb: (params?: any) => {}) {
             if (!h5ApiMap[method]) {
                 h5ApiMap[method] = cb
             }

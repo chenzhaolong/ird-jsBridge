@@ -237,11 +237,11 @@ export const RnSideApi = (function () {
                     if (tokenToH5) {
                         this.invokeH5({
                             method: `getSessionStoreH5-${key}`,
-                            params: data
+                            params: data || ''
                         });
                     }
                     else {
-                        console.warn('bridge is still not to build, if you must do send, you can set the noticeH5 true.');
+                        console.warn('bridge is still not to build, please set the noticeH5 true when the bridge built.');
                     }
                 }
             }

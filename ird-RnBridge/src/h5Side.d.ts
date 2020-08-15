@@ -23,7 +23,7 @@ export declare const H5SideApi: {
      * 监听rn-side调用的方法
      * @param cb 参数
      */
-    listenRN(method: string, cb: () => {}): void;
+    listenRN(method: string, cb: (params?: any) => {}): void;
     /**
      * 扩展h5-side的jsb的方法
      */
