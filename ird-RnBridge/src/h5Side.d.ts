@@ -41,6 +41,10 @@ export declare const H5SideApi: {
      */
     HttpType: typeof H5Side.InitiatorType;
     /**
+     * Debug枚举
+     */
+    DebugType: typeof H5Side.Debug;
+    /**
      * 获取制定的store
      */
     getSessionStore(keys: string[], cb: (data: object) => any): void;

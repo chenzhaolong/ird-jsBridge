@@ -597,7 +597,7 @@
           tokenFromRn = response.token;
           invokeCallback(callbackId, {
             isSuccess: true,
-            params: ''
+            params: response.params
           });
 
           if (consumeQueue.length > 0) {
@@ -841,6 +841,11 @@
         HttpType: H5Side.InitiatorType,
 
         /**
+         * Debug枚举
+         */
+        DebugType: H5Side.Debug,
+
+        /**
          * 获取制定的store
          */
         getSessionStore(keys, cb) {
@@ -966,9 +971,9 @@
 
       let RnApiMap = {}; // rn-side注册的回调
 
-      const RnCallback = {}; // rn-side注册的失败回调
+      let RnCallback = {}; // rn-side注册的失败回调
 
-      const RnCallbackFail = {}; // 验证通过传递给h5的票据
+      let RnCallbackFail = {}; // 验证通过传递给h5的票据
 
       let tokenToH5 = ''; // 记录cb的指针
 
@@ -1057,6 +1062,8 @@
          * @param api 注册的api方法集合
          */
         initWebview(refWebview, api) {
+          this.resetRN();
+
           if (refWebview) {
             webview = refWebview;
           }
@@ -1095,7 +1102,8 @@
                   response: {
                     RnApiMapKeys: isBoolean(options.isSuccess) ? RnApiMapKeys : [],
                     token: isBoolean(options.isSuccess) ? tokenToH5 : '',
-                    isSafe: isBoolean(options.isSuccess) && true
+                    isSafe: isBoolean(options.isSuccess) && true,
+                    params: options.result || ''
                   }
                 };
                 sendData(json);
@@ -1327,6 +1335,9 @@
           }
         },
 
+        /**
+         * 监听h5发布的console
+         */
         listenConsole() {
           if (!RnApiMap['debugConsole']) {
             RnApiMap['debugConsole'] = params => {
@@ -1355,6 +1366,19 @@
               print(...array);
             };
           }
+        },
+
+        /**
+         * 重置RN的私有变量
+         */
+        resetRN() {
+          webview = null;
+          RnApiMap = {};
+          RnCallback = {};
+          RnCallbackFail = {};
+          tokenToH5 = '';
+          rnCbId = 0;
+          this.clearSessionStore();
         }
 
       };

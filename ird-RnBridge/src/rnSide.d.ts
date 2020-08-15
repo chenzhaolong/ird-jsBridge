@@ -40,7 +40,7 @@ export declare const RnSideApi: {
     /**
      * 清除储存的数据
      */
-    clearSessionStore(key: string): void;
+    clearSessionStore(key?: string | undefined): void;
     /**
      * 是否有该储存数据
      */
@@ -49,5 +49,12 @@ export declare const RnSideApi: {
      * 监听h5发布的ajax请求
      */
     listenAjax(): void;
+    /**
+     * 监听h5发布的console
+     */
     listenConsole(): void;
+    /**
+     * 重置RN的私有变量
+     */
+    resetRN(): void;
 };

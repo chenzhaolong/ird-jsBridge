@@ -142,7 +142,7 @@ export const H5SideApi = (function () {
             bridgeTime.endTime = Date.now(); // 只有建立桥梁才有结束时间
             RnApiMap = response.RnApiMapKeys;
             tokenFromRn = response.token;
-            invokeCallback(callbackId, { isSuccess: true, params: '' });
+            invokeCallback(callbackId, { isSuccess: true, params: response.params });
             if (consumeQueue.length > 0) {
                 consumeQueue.forEach((json) => {
                     // @ts-ignore
@@ -335,6 +335,10 @@ export const H5SideApi = (function () {
          * 资源枚举
          */
         HttpType: H5Side.InitiatorType,
+        /**
+         * Debug枚举
+         */
+        DebugType: H5Side.Debug,
         /**
          * 获取制定的store
          */

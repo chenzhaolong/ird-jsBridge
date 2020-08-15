@@ -14,10 +14,10 @@ export const RnSideApi = (function () {
     let RnApiMap: {[key: string]: any} = {};
 
     // rn-side注册的回调
-    const RnCallback: {[key: string]: any} = {};
+    let RnCallback: {[key: string]: any} = {};
 
     // rn-side注册的失败回调
-    const RnCallbackFail: {[key: string]: any} = {};
+    let RnCallbackFail: {[key: string]: any} = {};
 
     // 验证通过传递给h5的票据
     let tokenToH5 = '';
@@ -91,6 +91,7 @@ export const RnSideApi = (function () {
          * @param api 注册的api方法集合
          */
         initWebview(refWebview: any, api: RnSide.ApiMap) {
+            this.resetRN();
             if (refWebview) {
                 webview = refWebview;
             }
@@ -253,7 +254,7 @@ export const RnSideApi = (function () {
                            params: data
                        });
                    } else {
-                       console.warn('bridge is still not to build, if you must do send, you can set the noticeH5 true.');
+                       console.warn('bridge is still not to build, please set the noticeH5 true when the bridge built.');
                    }
                }
            } else {
@@ -264,7 +265,7 @@ export const RnSideApi = (function () {
         /**
          * 清除储存的数据
          */
-       clearSessionStore(key: string) {
+       clearSessionStore(key?: string) {
            const store = getStoreInstance();
            store.clear(key);
        },
@@ -308,6 +309,9 @@ export const RnSideApi = (function () {
             }
        },
 
+        /**
+         * 监听h5发布的console
+         */
        listenConsole() {
            if (!RnApiMap['debugConsole']) {
                RnApiMap['debugConsole'] = (params: any) => {
@@ -329,6 +333,19 @@ export const RnSideApi = (function () {
                    print(...array);
                }
            }
+       },
+
+        /**
+         * 重置RN的私有变量
+         */
+       resetRN() {
+           webview = null;
+           RnApiMap = {};
+           RnCallback = {};
+           RnCallbackFail = {};
+           tokenToH5 = '';
+           rnCbId = 0;
+           this.clearSessionStore();
        }
     }
 })();

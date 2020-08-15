@@ -29,10 +29,10 @@
       //     alert('ad')
       //     RnBridge.invokeRN({method: 'setTitle', params: {name: title}})
       // });
-      RnBridge.checkSafety({demo: 'demo'}, () => {
+      RnBridge.checkSafety({demo: 'demo'}, (data) => {
           document.getElementById('demo').style.color = 'blue';
           // RnBridge.setTitle('设置');
-          console.log('bridge success');
+          console.log('bridge success:', data);
           RnBridge.getSessionStore(['sat2'], (data) => {
               const content = document.getElementById('content');
               content.innerText = JSON.stringify(data);

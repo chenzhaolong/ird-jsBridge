@@ -11,9 +11,9 @@ export const RnSideApi = (function () {
     // rn-side注册的方法
     let RnApiMap = {};
     // rn-side注册的回调
-    const RnCallback = {};
+    let RnCallback = {};
     // rn-side注册的失败回调
-    const RnCallbackFail = {};
+    let RnCallbackFail = {};
     // 验证通过传递给h5的票据
     let tokenToH5 = '';
     // 记录cb的指针
@@ -81,6 +81,7 @@ export const RnSideApi = (function () {
          * @param api 注册的api方法集合
          */
         initWebview(refWebview, api) {
+            this.resetRN();
             if (refWebview) {
                 webview = refWebview;
             }
@@ -110,7 +111,8 @@ export const RnSideApi = (function () {
                             response: {
                                 RnApiMapKeys: isBoolean(options.isSuccess) ? RnApiMapKeys : [],
                                 token: isBoolean(options.isSuccess) ? tokenToH5 : '',
-                                isSafe: isBoolean(options.isSuccess) && true
+                                isSafe: isBoolean(options.isSuccess) && true,
+                                params: options.result || ''
                             }
                         };
                         sendData(json);
@@ -291,6 +293,9 @@ export const RnSideApi = (function () {
                 };
             }
         },
+        /**
+         * 监听h5发布的console
+         */
         listenConsole() {
             if (!RnApiMap['debugConsole']) {
                 RnApiMap['debugConsole'] = (params) => {
@@ -312,6 +317,18 @@ export const RnSideApi = (function () {
                     print(...array);
                 };
             }
+        },
+        /**
+         * 重置RN的私有变量
+         */
+        resetRN() {
+            webview = null;
+            RnApiMap = {};
+            RnCallback = {};
+            RnCallbackFail = {};
+            tokenToH5 = '';
+            rnCbId = 0;
+            this.clearSessionStore();
         }
     };
 })();

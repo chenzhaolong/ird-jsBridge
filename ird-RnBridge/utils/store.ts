@@ -43,7 +43,7 @@ class Store {
         return this.cache[key];
     }
 
-    clear(key: string) {
+    clear(key?: string) {
         if (!key) {
             this.cache = {};
         } else if (Object.keys(this.cache).indexOf(key) !== -1) {
