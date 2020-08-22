@@ -6,7 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "dragonchen",
   "license": "ISC",
-  "description": ""
+  "description": "the bridge between react-native and h5",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenzhaolong/ird-jsBridge.git"
+  },
+  "keywords": [
+    "jsbridge"
+  ],
+  "bugs": {
+    "url": "https://github.com/chenzhaolong/ird-jsBridge/issues"
+  },
+  "homepage": "https://github.com/chenzhaolong/ird-jsBridge#readme"
 }
